@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 struct Particle {
     mass: f64,
     position: Vec<f64>,
     velocity: Vec<f64>,
     acceleration: Vec<f64>,
-    linked_masses: Vec<Particle>,
+    linked_masses: HashMap<Particle, f64>,
 }
 
 impl ToString for Particle {
@@ -19,7 +21,7 @@ impl Particle {
             position: vec![0.0, 0.0, 0.0],
             velocity: vec![0.0, 0.0, 0.0],
             acceleration: vec![0.0, 0.0, 0.0],
-            linked_masses: vec![],
+            linked_masses: HashMap::new(),
         }
     }
 }
