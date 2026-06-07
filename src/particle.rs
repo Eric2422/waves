@@ -27,7 +27,7 @@ impl Particle {
     }
 
     pub fn builder() -> ParticleBuilder {
-        ParticleBuilder::new();
+        ParticleBuilder::new()
     }
 }
 
