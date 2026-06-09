@@ -1,10 +1,7 @@
-use core::error;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::io;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::thread::Builder;
 
 use thiserror::Error;
 
@@ -15,11 +12,12 @@ pub enum BuilderError {
     Mass(f64),
 
     #[error(
-        "Linked particle {:?} has spring constant {} N/m but should be positive.",
+        "{:?} was linked to {:?} with spring constant {} N/m, but the spring constant should be positive.",
         0,
-        1
+        1,
+        2
     )]
-    Spring(Particle, f64),
+    Spring(Particle, Particle, f64),
 }
 
 
@@ -89,14 +87,16 @@ impl Particle {
     /// The value stored in [`PARTICLE_COUNTER`] will increment by one (1) after
     /// calling.
     fn new(builder: ParticleBuilder) -> Particle {
-        Particle {
+        let new_particle = Particle {
             id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
             mass: builder.mass,
             position: builder.position,
             velocity: builder.velocity,
             acceleration: builder.acceleration,
             linked_particles: builder.linked_particles,
-        }
+        };
+
+        new_particle
     }
 
     /// Instantiates and returns a new [`ParticleBuilder`].
@@ -192,6 +192,10 @@ impl ParticleBuilder {
     /// [`acceleration`]: Particle::acceleration
     /// [`linked_particles`]: Particle::linked_particles
     pub fn build(self) -> Result<Particle, BuilderError> {
-        Ok(Particle::new(self))
+        if self.mass < 0.0 {
+            Err(BuilderError::Mass(self.mass))
+        } else {
+            Ok(Particle::new(self))
+        }
     }
 }
