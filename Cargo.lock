@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "longitudinal-waves"
+name = "longitudinal_waves"
 version = "0.1.0"
