@@ -1,6 +1,10 @@
 [package]
-name = "longitudinal-waves"
+name = "longitudinal_waves"
 version = "0.1.0"
 edition = "2024"
+description = "A simulation of longitudinal waves in masses connected by linear springs."
+readme = "README.md"
+repository = "https://github.com/Eric2422/longitudinal-waves"
+license = "MIT"
 
 [dependencies]
