@@ -192,7 +192,7 @@ impl ParticleBuilder {
     /// [`acceleration`]: Particle::acceleration
     /// [`linked_particles`]: Particle::linked_particles
     pub fn build(self) -> Result<Particle, BuilderError> {
-        if self.mass < 0.0 {
+        if self.mass <= 0.0 {
             Err(BuilderError::Mass(self.mass))
         } else {
             Ok(Particle::new(self))
