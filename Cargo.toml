@@ -8,3 +8,4 @@ repository = "https://github.com/Eric2422/longitudinal-waves"
 license = "MIT"
 
 [dependencies]
+thiserror = "2.0.18"
