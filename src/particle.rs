@@ -95,7 +95,7 @@ impl Particle {
             mass: builder.mass,
             position: builder.position,
             velocity: builder.velocity,
-            acceleration: builder.acceleration,
+            acceleration: vec![0.0, 0.0, 0.0],
             linked_particles: builder.linked_particles,
         };
 
@@ -124,7 +124,6 @@ pub struct ParticleBuilder {
     mass: f64,
     position: Vec<f64>,
     velocity: Vec<f64>,
-    acceleration: Vec<f64>,
     linked_particles: HashMap<Particle, f64>,
 }
 
@@ -137,7 +136,6 @@ impl ParticleBuilder {
             mass: 1.0,
             position: vec![0.0, 0.0, 0.0],
             velocity: vec![0.0, 0.0, 0.0],
-            acceleration: vec![0.0, 0.0, 0.0],
             linked_particles: HashMap::new(),
         }
     }
@@ -205,27 +203,6 @@ impl ParticleBuilder {
         self
     }
 
-    /// Set the [`acceleration`] of the [`Particle`] as a 3D vector in meters
-    /// per second squared (m/s²).
-    ///
-    /// Can be chained with other setter methods.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let particle = ParticleBuilder::new()
-    ///                                .set_mass(2.0)
-    ///                                .set_position(1.0, 1.0, 1.0)
-    ///                                .set_velocity(0.5, 0.5, 0.5)
-    ///                                .build();
-    /// ```
-    ///
-    /// [`acceleration`]: Particle::acceleration
-    pub fn set_acceleration(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.acceleration = vec![x, y, z];
-        self
-    }
-
     /// Link this [`Particle`] to another [`Particle`] with a spring of constant
     /// `spring_constant` in newtons per meter (N/m), updating
     /// [`linked_masses`] accordingly.
@@ -238,7 +215,11 @@ impl ParticleBuilder {
     /// # Example
     ///
     /// ```rust
-    /// let particle = ParticleBuilder::new().set_mass(2.0).set_position(1.0, 1.0, 1.0).set_velocity(0.5, 0.5, 0.5).build();
+    /// let particle = ParticleBuilder::new()
+    ///                                .set_mass(2.0)
+    ///                                .set_position(1.0, 1.0, 1.0)
+    ///                                .set_velocity(0.5, 0.5, 0.5)
+    ///                                .build();
     /// ```
     ///
     /// [`linked_particles`]: Particle::linked_particles
