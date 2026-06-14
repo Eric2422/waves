@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
 
 
 /// Counter for the [`id`](Particle::id) property of the [`Particle`] class.
-static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
+static PARTICLE_COUNTER: AtomicU32 = AtomicU32::new(0);
 
 
 /// A single particle in a longitudinal wave, each connected to other particles
 /// by linear springs.
 pub struct Particle {
-    id: usize,
+    id: u32,
     /// The mass of this particle in kilograms (kg).
     mass: f64,
     /// The position of this particle in meters (m) as a vector in 3D space.
