@@ -29,12 +29,6 @@ pub struct Particle {
     linked_particles: HashMap<Particle, f64>,
 }
 
-impl ToString for Particle {
-    fn to_string(&self) -> String {
-        format!("{}, {:?}", self.mass, self.position)
-    }
-}
-
 impl Debug for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Particle")
@@ -48,6 +42,32 @@ impl Debug for Particle {
     }
 }
 
+impl Clone for Particle {
+    /// Create a deep copy of this [`Particle`] except for the [`id`] property,
+    /// which still increments by 1, similarly to [`Particle::new()`].
+    /// 
+    /// [`id`]: Particle::id
+    fn clone(&self) -> Self {
+        Self {
+            id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
+            mass: self.mass.clone(),
+            position: self.position.clone(),
+            velocity: self.velocity.clone(),
+            acceleration: self.acceleration.clone(),
+            linked_particles: self.linked_particles.clone(),
+        }
+    }
+}
+
+impl Eq for Particle {}
+
+impl Hash for Particle {
+    /// Generate a hash based on based on [`Particle::id`].
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+
 impl PartialEq for Particle {
     /// Check if this [`Particle`] is considered equivalent to another
     /// [`Particle`], returning `true` if and only if they have the same [`id`].
@@ -58,12 +78,9 @@ impl PartialEq for Particle {
     }
 }
 
-impl Eq for Particle {}
-
-impl Hash for Particle {
-    /// Generate a hash based on based on [`Particle::id`].
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
+impl ToString for Particle {
+    fn to_string(&self) -> String {
+        format!("{}, {:?}", self.mass, self.position)
     }
 }
 
