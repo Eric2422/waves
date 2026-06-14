@@ -43,6 +43,5 @@ fn main() {
     }
 
     let spring_constant = input_json.spring_constant;
-    let builder = ParticleBuilder::new();
-    let particle = builder.set_mass(input_json.mass);
+    let particle = ParticleBuilder::new().set_mass(input_json.mass).build();
 }
