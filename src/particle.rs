@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 
 /// Counter for the [`id`] property of the [`Particle`] class.
-/// 
+///
 /// [`id`]: Particle::id
 static PARTICLE_COUNTER: AtomicU32 = AtomicU32::new(0);
 
