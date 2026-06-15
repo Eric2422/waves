@@ -29,12 +29,6 @@ pub struct Particle {
     linked_particles: HashMap<Particle, f64>,
 }
 
-impl ToString for Particle {
-    fn to_string(&self) -> String {
-        format!("{}, {:?}", self.mass, self.position)
-    }
-}
-
 impl Debug for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Particle")
@@ -48,6 +42,32 @@ impl Debug for Particle {
     }
 }
 
+impl Clone for Particle {
+    /// Create a deep copy of this [`Particle`] except for the [`id`] property,
+    /// which still increments by 1, similarly to [`Particle::new()`].
+    ///
+    /// [`id`]: Particle::id
+    fn clone(&self) -> Self {
+        Self {
+            id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
+            mass: self.mass.clone(),
+            position: self.position.clone(),
+            velocity: self.velocity.clone(),
+            acceleration: self.acceleration.clone(),
+            linked_particles: self.linked_particles.clone(),
+        }
+    }
+}
+
+impl Eq for Particle {}
+
+impl Hash for Particle {
+    /// Generate a hash based on based on [`Particle::id`].
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+
 impl PartialEq for Particle {
     /// Check if this [`Particle`] is considered equivalent to another
     /// [`Particle`], returning `true` if and only if they have the same [`id`].
@@ -58,12 +78,9 @@ impl PartialEq for Particle {
     }
 }
 
-impl Eq for Particle {}
-
-impl Hash for Particle {
-    /// Generate a hash based on based on [`Particle::id`].
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
+impl ToString for Particle {
+    fn to_string(&self) -> String {
+        format!("{}, {:?}", self.mass, self.position)
     }
 }
 
@@ -78,7 +95,7 @@ impl Particle {
             mass: builder.mass,
             position: builder.position,
             velocity: builder.velocity,
-            acceleration: builder.acceleration,
+            acceleration: vec![0.0, 0.0, 0.0],
             linked_particles: builder.linked_particles,
         };
 
@@ -107,7 +124,6 @@ pub struct ParticleBuilder {
     mass: f64,
     position: Vec<f64>,
     velocity: Vec<f64>,
-    acceleration: Vec<f64>,
     linked_particles: HashMap<Particle, f64>,
 }
 
@@ -120,7 +136,6 @@ impl ParticleBuilder {
             mass: 1.0,
             position: vec![0.0, 0.0, 0.0],
             velocity: vec![0.0, 0.0, 0.0],
-            acceleration: vec![0.0, 0.0, 0.0],
             linked_particles: HashMap::new(),
         }
     }
@@ -129,32 +144,63 @@ impl ParticleBuilder {
     /// value for [`mass`] is non-positive (i.e., [`mass`] < 0.0 kg), the
     /// current [`mass`] remains unchanged.
     ///
+    /// Can be chained with other setter methods.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let particle = ParticleBuilder::new()
+    ///                                .set_mass(2.0)
+    ///                                .set_position(1.0, 1.0, 1.0)
+    ///                                .set_velocity(0.5, 0.5, 0.5)
+    ///                                .build();
+    /// ```
+    ///
     /// [`mass`]: Particle::mass
-    pub fn set_mass(mut self, mass: f64) {
+    pub fn set_mass(mut self, mass: f64) -> ParticleBuilder {
         self.mass = mass;
+        self
     }
 
     /// Set the [`position`] of the [`Particle`] as a 3D vector in meters (m).
     ///
+    /// Can be chained with other setter methods.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let particle = ParticleBuilder::new()
+    ///                                .set_mass(2.0)
+    ///                                .set_position(1.0, 1.0, 1.0)
+    ///                                .set_velocity(0.5, 0.5, 0.5)
+    ///                                .build();
+    /// ```
+    ///
     /// [`position`]: Particle::position
-    pub fn set_position(mut self, x: f64, y: f64, z: f64) {
+    pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
         self.position = vec![x, y, z];
+        self
     }
 
     /// Set the [`velocity`] of the [`Particle`] as a 3D vector in meters per
     /// second (m/s).
     ///
-    /// [`velocity`]: Particle::velocity
-    pub fn set_velocity(mut self, x: f64, y: f64, z: f64) {
-        self.velocity = vec![x, y, z];
-    }
-
-    /// Set the [`acceleration`] of the [`Particle`] as a 3D vector in meters
-    /// per second squared (m/s²).
+    /// Can be chained with other setter methods.
     ///
-    /// [`acceleration`]: Particle::acceleration
-    pub fn set_acceleration(mut self, x: f64, y: f64, z: f64) {
-        self.acceleration = vec![x, y, z];
+    /// # Example
+    ///
+    /// ```rust
+    /// let particle = ParticleBuilder::new()
+    ///                                .set_mass(2.0)
+    ///                                .set_position(1.0, 1.0, 1.0)
+    ///                                .set_velocity(0.5, 0.5, 0.5)
+    ///                                .build();
+    /// ```
+    ///
+    /// [`velocity`]: Particle::velocity
+    pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
+        self.velocity = vec![x, y, z];
+        self
     }
 
     /// Link this [`Particle`] to another [`Particle`] with a spring of constant
@@ -164,9 +210,26 @@ impl ParticleBuilder {
     /// If the given [`Particle`] already exists in [`linked_particles`], the
     /// pre-existing spring constant will be replaced with the new one.
     ///
+    /// Can be chained with other setter methods.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let particle = ParticleBuilder::new()
+    ///                                .set_mass(2.0)
+    ///                                .set_position(1.0, 1.0, 1.0)
+    ///                                .set_velocity(0.5, 0.5, 0.5)
+    ///                                .build();
+    /// ```
+    ///
     /// [`linked_particles`]: Particle::linked_particles
-    pub fn add_linked_particle(mut self, particle: Particle, spring_constant: f64) {
+    pub fn add_linked_particle(
+        mut self,
+        particle: Particle,
+        spring_constant: f64,
+    ) -> ParticleBuilder {
         self.linked_particles.insert(particle, spring_constant);
+        self
     }
 
     /// Attempts to instantiate a new [`Particle`] object using the current
