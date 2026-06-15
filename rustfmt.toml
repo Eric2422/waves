@@ -3,4 +3,5 @@ edition = "2024"
 unstable_features = true
 
 blank_lines_upper_bound = 2
+format_code_in_doc_comments = true
 wrap_comments = true
