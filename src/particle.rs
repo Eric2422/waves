@@ -17,13 +17,13 @@ pub struct Particle {
     /// The mass of this particle in kilograms (kg).
     mass: f64,
     /// The position of this particle in meters (m) as a vector in 3D space.
-    position: Vec<f64>,
+    position: [f64; 3],
     /// The velocity of this particle in meters per second (m/s) as a vector in
     /// 3D space.
-    velocity: Vec<f64>,
+    velocity: [f64; 3],
     /// The acceleration of this particle in meters per second squared (m/s²) as
     /// a vector in 3D space.
-    acceleration: Vec<f64>,
+    acceleration: [f64; 3],
     /// The particles that this particle is linked to by springs and the spring
     /// constant of the respective spring in newtons per meters (n/m).
     linked_particles: HashMap<Particle, f64>,
@@ -95,7 +95,7 @@ impl Particle {
             mass: builder.mass,
             position: builder.position,
             velocity: builder.velocity,
-            acceleration: vec![0.0, 0.0, 0.0],
+            acceleration: [0.0, 0.0, 0.0],
             linked_particles: builder.linked_particles,
         };
 
@@ -122,8 +122,8 @@ impl Particle {
 /// [`id`]: Particle::id
 pub struct ParticleBuilder {
     mass: f64,
-    position: Vec<f64>,
-    velocity: Vec<f64>,
+    position: [f64; 3],
+    velocity: [f64; 3],
     linked_particles: HashMap<Particle, f64>,
 }
 
@@ -134,8 +134,8 @@ impl ParticleBuilder {
     pub fn new() -> ParticleBuilder {
         ParticleBuilder {
             mass: 1.0,
-            position: vec![0.0, 0.0, 0.0],
-            velocity: vec![0.0, 0.0, 0.0],
+            position: [0.0, 0.0, 0.0],
+            velocity: [0.0, 0.0, 0.0],
             linked_particles: HashMap::new(),
         }
     }
@@ -178,7 +178,7 @@ impl ParticleBuilder {
     ///
     /// [`position`]: Particle::position
     pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.position = vec![x, y, z];
+        self.position = [x, y, z];
         self
     }
 
@@ -199,7 +199,7 @@ impl ParticleBuilder {
     ///
     /// [`velocity`]: Particle::velocity
     pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.velocity = vec![x, y, z];
+        self.velocity = [x, y, z];
         self
     }
 
