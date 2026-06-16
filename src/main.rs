@@ -9,12 +9,37 @@ mod particle;
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
 pub struct InputJson {
+    /// Size of each time step in seconds (s).
+    time_step_size: f64,
+    /// The number of time steps to run.
+    num_time_steps: u32,
+    /// The number of [`Particle`]s in each direction: x, y, and z.
     dimensions: [usize; 3],
-    distance: f64,
+    /// The distance between [`Particle`]s in each direction. Measured in meters
+    /// (m).
+    distance: [f64; 3],
+    /// The mass of each individual [`Particle`] in kilograms (kg).
     mass: f64,
+    /// The spring constant between each pair of particles. Measured in meters
+    /// (m).
     spring_constant: f64,
+    /// The damping coefficient of the springs in newton-seconds per meter
+    /// (N⋅s⋅m⁻¹).
+    damping: f64,
+    /// The amplitude of the driving force as a 3D vector measured in in newtons
+    /// (N).
+    driving_amplitude: [f64; 3],
+    /// The angular frequency of the driving force in radians per second
+    /// (rad/s).
+    driving_frequency: f64,
 }
 
+fn update_particles(particles: &mut Vec<Vec<Vec<Particle>>>, input_json: &InputJson) {
+    for y in 0..particles[0].len() {
+        for z in 0..particles[0][y].len() {
+        }
+    }
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -44,9 +69,9 @@ fn main() {
                     ParticleBuilder::new()
                         .set_mass(input_json.mass)
                         .set_position(
-                            (x as f64) * input_json.distance,
-                            (y as f64) * input_json.distance,
-                            (z as f64) * input_json.distance,
+                            (x as f64) * input_json.distance[0],
+                            (y as f64) * input_json.distance[1],
+                            (z as f64) * input_json.distance[2],
                         )
                         .build(),
                 );

@@ -25,7 +25,7 @@ pub struct Particle {
     /// a vector in 3D space.
     acceleration: [f64; 3],
     /// The particles that this particle is linked to by springs and the spring
-    /// constant of the respective spring in newtons per meters (n/m).
+    /// constant of the respective spring in newtons per meters (N/m).
     linked_particles: HashMap<Particle, f64>,
 }
 
