@@ -10,7 +10,7 @@ mod particle;
 #[derive(Serialize, Deserialize)]
 pub struct InputJson {
     dimensions: [usize; 3],
-    distance: f64,
+    distance: [f64; 3],
     mass: f64,
     spring_constant: f64,
 }
@@ -44,9 +44,9 @@ fn main() {
                     ParticleBuilder::new()
                         .set_mass(input_json.mass)
                         .set_position(
-                            (x as f64) * input_json.distance,
-                            (y as f64) * input_json.distance,
-                            (z as f64) * input_json.distance,
+                            (x as f64) * input_json.distance[0],
+                            (y as f64) * input_json.distance[1],
+                            (z as f64) * input_json.distance[2],
                         )
                         .build(),
                 );
