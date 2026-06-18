@@ -15,7 +15,7 @@ static PARTICLE_COUNTER: AtomicU32 = AtomicU32::new(0);
 pub struct Particle {
     id: u32,
     /// The mass of this particle in kilograms (kg).
-    mass: f64,
+    pub mass: f64,
     /// The position of this particle in meters (m) as a vector in 3D space.
     position: [f64; 3],
     /// The velocity of this particle in meters per second (m/s) as a vector in

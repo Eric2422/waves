@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{array, env, fs};
+use std::{array, env, fs, path};
 
 use crate::particle::{Particle, ParticleBuilder};
 
@@ -77,6 +77,7 @@ fn update_particles(
     input_json: &InputJson,
     current_time_step: f64,
 ) {
+    // Calculate the current force given by a sinusoidal driving force.
     let current_force = multiply_3d_vector_by_scalar(
         input_json.driving_amplitude,
         (input_json.driving_frequency * input_json.time_step_size * current_time_step
@@ -84,9 +85,12 @@ fn update_particles(
             .cos(),
     );
 
+    // Set the acceleration based on the driving force. The forces from any springs
+    // will be added later.
     for y in 0..particles[0].len() {
         for z in 0..particles[0][y].len() {
-            particles[0][y][z].acceleration = current_force;
+            particles[0][y][z].acceleration =
+                multiply_3d_vector_by_scalar(current_force, 1.0 / particles[0][y][z].mass);
         }
     }
 }
