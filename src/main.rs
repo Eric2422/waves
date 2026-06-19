@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{array, env, fs, path};
+use std::{env, fs};
 
 use crate::particle::{Particle, ParticleBuilder};
 
@@ -15,29 +15,29 @@ pub struct InputJson {
     total_num_time_steps: u32,
     /// The number of [`Particle`]s in each direction: x, y, and z.
     dimensions: [usize; 3],
-    /// The distance between [`Particle`]s in each direction. Measured in meters
-    /// (m).
+    /// The distance between [`Particle`]s in each direction.
+    /// Measured in meters (m).
     distance: [f64; 3],
     /// The mass of each individual [`Particle`] in kilograms (kg).
     mass: f64,
-    /// The spring constant between each pair of particles. Measured in meters
-    /// (m).
+    /// The spring constant between each pair of particles,
+    /// measured in newtons per meter (N/m).
     spring_constant: f64,
     /// The damping coefficient of the springs in newton-seconds per meter
     /// (N⋅s⋅m⁻¹).
     damping: f64,
-    /// The amplitude of the driving force as a 3D vector measured in in newtons
-    /// (N).
+    /// The amplitude of the driving force as a 3D vector
+    /// measured in newtons (N).
     driving_amplitude: [f64; 3],
-    /// The angular frequency of the driving force in radians per second
-    /// (rad/s).
+    /// The angular frequency of the driving force
+    /// in radians per second (rad/s).
     driving_frequency: f64,
     /// The phase shift of the driving force, which is a dimensionless value.
     driving_phase: f64,
 }
 
-/// Add two 3D vectors together, returning the vector sum. *Neither* of the
-/// original arrays are modified.
+/// Add two 3D vectors together, returning the vector sum.
+/// *Neither* of the original arrays are modified.
 ///
 /// # Examples
 ///
@@ -53,8 +53,8 @@ fn add_3d_vectors(array1: [f64; 3], array2: [f64; 3]) -> [f64; 3] {
     ]
 }
 
-/// Multiply a 3D vector by a scalar value, returning the product. The original
-/// array is *not* modified.
+/// Multiply a 3D vector by a scalar value, returning the product.
+/// The original array is *not* modified.
 ///
 /// # Examples
 ///
@@ -85,8 +85,8 @@ fn update_particles(
             .cos(),
     );
 
-    // Set the acceleration based on the driving force. The forces from any springs
-    // will be added later.
+    // Set the acceleration based on the driving force.
+    // The forces from any springs will be added later.
     for y in 0..particles[0].len() {
         for z in 0..particles[0][y].len() {
             particles[0][y][z].acceleration =

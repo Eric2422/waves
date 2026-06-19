@@ -10,22 +10,21 @@ use std::sync::atomic::{AtomicU32, Ordering};
 static PARTICLE_COUNTER: AtomicU32 = AtomicU32::new(0);
 
 
-/// A single particle in a longitudinal wave, each connected to other particles
-/// by linear springs.
+/// A single particle in a longitudinal wave,
+/// each connected to other particles by linear springs.
 pub struct Particle {
     id: u32,
     /// The mass of this particle in kilograms (kg).
     pub mass: f64,
-    /// The position of this particle in meters (m) as a vector in 3D space.
+    /// The position of this particle as a 3D vector in meters (m).
     position: [f64; 3],
-    /// The velocity of this particle in meters per second (m/s) as a vector in
-    /// 3D space.
+    /// The velocity of this particle as a 3D vector in meters per second (m/s).
     velocity: [f64; 3],
-    /// The acceleration of this particle in meters per second squared (m/s²) as
-    /// a vector in 3D space.
+    /// The acceleration of this particle as a 3D vector
+    /// in meters per second squared (m/s²).
     pub acceleration: [f64; 3],
-    /// The particles that this particle is linked to by springs and the spring
-    /// constant of the respective spring in newtons per meters (N/m).
+    /// The particles that this particle is linked to by springs
+    /// mapped onto the respective spring constants in newtons per meters (N/m).
     linked_particles: HashMap<Particle, f64>,
 }
 
@@ -85,10 +84,14 @@ impl ToString for Particle {
 }
 
 impl Particle {
-    /// Create a new [`Particle`] based on the given
+    /// Create a new [`Particle`] based on the given [`ParticleBuilder`]
+    /// instance.
+    /// The [`id`] property will be assigned from the value stored in
+    /// [`PARTICLE_COUNTER`],
+    /// which increments by one (1) every time this function is called.
+    /// Thus, no two [`Particle`]s will have an identical [`id`].
     ///
-    /// The value stored in [`PARTICLE_COUNTER`] will increment by one (1) after
-    /// calling.
+    /// [`id`]: Particle::id
     fn new(builder: ParticleBuilder) -> Particle {
         let new_particle = Particle {
             id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
@@ -109,10 +112,11 @@ impl Particle {
 }
 
 
-/// A builder for the [`Particle`] class, allowing for a way to set the
-/// [`mass`], [`position`], [`velocity`], [`acceleration`], and
-/// [`linked_particles`]. Note that since [`id`]s are predetermined, the builder
-/// does not come with a method to set the [`id`].
+/// A builder for the [`Particle`] class,
+/// allowing for a way to set the [`mass`], [`position`], [`velocity`],
+/// [`acceleration`], and [`linked_particles`].
+/// Note that since [`id`]s are predetermined in [`Particle::new()`],
+/// the builder does not come with a method to set the [`id`].
 ///
 /// [`mass`]: Particle::mass
 /// [`position`]: Particle::position
@@ -140,9 +144,9 @@ impl ParticleBuilder {
         }
     }
 
-    /// Set the [`mass`] of the [`Particle`] in kilograms (kg). If the given new
-    /// value for [`mass`] is non-positive (i.e., [`mass`] < 0.0 kg), the
-    /// current [`mass`] remains unchanged.
+    /// Set the [`mass`] of the [`Particle`] in kilograms (kg).
+    /// If the given new value for [`mass`] is non-positive,
+    /// i.e., [`mass`] < 0.0 kg, the current [`mass`] remains unchanged.
     ///
     /// Can be chained with other setter methods.
     ///
@@ -150,10 +154,10 @@ impl ParticleBuilder {
     ///
     /// ```rust
     /// let particle = ParticleBuilder::new()
-    ///                                .set_mass(2.0)
-    ///                                .set_position(1.0, 1.0, 1.0)
-    ///                                .set_velocity(0.5, 0.5, 0.5)
-    ///                                .build();
+    ///     .set_mass(2.0)
+    ///     .set_position(1.0, 1.0, 1.0)
+    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .build();
     /// ```
     ///
     /// [`mass`]: Particle::mass
@@ -170,10 +174,10 @@ impl ParticleBuilder {
     ///
     /// ```rust
     /// let particle = ParticleBuilder::new()
-    ///                                .set_mass(2.0)
-    ///                                .set_position(1.0, 1.0, 1.0)
-    ///                                .set_velocity(0.5, 0.5, 0.5)
-    ///                                .build();
+    ///     .set_mass(2.0)
+    ///     .set_position(1.0, 1.0, 1.0)
+    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .build();
     /// ```
     ///
     /// [`position`]: Particle::position
@@ -191,10 +195,10 @@ impl ParticleBuilder {
     ///
     /// ```rust
     /// let particle = ParticleBuilder::new()
-    ///                                .set_mass(2.0)
-    ///                                .set_position(1.0, 1.0, 1.0)
-    ///                                .set_velocity(0.5, 0.5, 0.5)
-    ///                                .build();
+    ///     .set_mass(2.0)
+    ///     .set_position(1.0, 1.0, 1.0)
+    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .build();
     /// ```
     ///
     /// [`velocity`]: Particle::velocity
@@ -203,12 +207,12 @@ impl ParticleBuilder {
         self
     }
 
-    /// Link this [`Particle`] to another [`Particle`] with a spring of constant
-    /// `spring_constant` in newtons per meter (N/m), updating
-    /// [`linked_masses`] accordingly.
+    /// Link this [`Particle`] to another [`Particle`]
+    /// with a spring of constant `spring_constant` in newtons per meter (N/m),
+    /// updating [`linked_masses`] accordingly.
     ///
-    /// If the given [`Particle`] already exists in [`linked_particles`], the
-    /// pre-existing spring constant will be replaced with the new one.
+    /// If the given [`Particle`] already exists in [`linked_particles`],
+    /// the pre-existing spring constant will be replaced with the new one.
     ///
     /// Can be chained with other setter methods.
     ///
@@ -216,10 +220,10 @@ impl ParticleBuilder {
     ///
     /// ```rust
     /// let particle = ParticleBuilder::new()
-    ///                                .set_mass(2.0)
-    ///                                .set_position(1.0, 1.0, 1.0)
-    ///                                .set_velocity(0.5, 0.5, 0.5)
-    ///                                .build();
+    ///     .set_mass(2.0)
+    ///     .set_position(1.0, 1.0, 1.0)
+    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .build();
     /// ```
     ///
     /// [`linked_particles`]: Particle::linked_particles
@@ -232,10 +236,9 @@ impl ParticleBuilder {
         self
     }
 
-    /// Attempts to instantiate a new [`Particle`] object using the current
-    /// values of [`mass`], [`position`], [`velocity`], [`acceleration`], and
-    /// [`linked_particles`]. If any fields are not valid, return an
-    /// [`BuilderError`].
+    /// Attempts to instantiate a new [`Particle`] object
+    /// using the current values of [`mass`], [`position`], [`velocity`],
+    /// [`acceleration`], and [`linked_particles`].
     ///
     /// [`mass`]: Particle::mass
     /// [`position`]: Particle::position
