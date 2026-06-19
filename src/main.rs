@@ -45,11 +45,11 @@ pub struct InputJson {
 /// // Returns [4, 4, 4].
 /// let array_sum = add_3d_vectors([1, 2, 3], [3, 2, 1]);
 /// ```
-fn add_3d_vectors(array1: [f64; 3], array2: [f64; 3]) -> [f64; 3] {
+fn add_vectors(vector1: [f64; 3], vector2: [f64; 3]) -> [f64; 3] {
     [
-        array1[0] + array2[0],
-        array1[1] + array2[1],
-        array1[2] + array2[2],
+        vector1[0] + vector2[0],
+        vector1[1] + vector2[1],
+        vector1[2] + vector2[2],
     ]
 }
 
@@ -62,8 +62,13 @@ fn add_3d_vectors(array1: [f64; 3], array2: [f64; 3]) -> [f64; 3] {
 /// // Returns [10, 20, 30].
 /// let new_array = multiply_array_scalar([1, 2, 3], 10);
 /// ```
-fn multiply_3d_vector_by_scalar(array: [f64; 3], scalar: f64) -> [f64; 3] {
-    [array[0] * scalar, array[1] * scalar, array[2] * scalar]
+fn multiply_vector_by_scalar(vector: [f64; 3], scalar: f64) -> [f64; 3] {
+    [vector[0] * scalar, vector[1] * scalar, vector[2] * scalar]
+}
+
+/// Calculate the magnitude of the given 3D vector.
+fn calculate_vector_magnitude(vector: [f64; 3]) -> f64 {
+    (vector[0].powi(2) + vector[1].powi(2) + vector[2].powi(2)).sqrt()
 }
 
 /// Update the current [`acceleration`], [`velocity`], and [`position`] of the
@@ -78,7 +83,7 @@ fn update_particles(
     current_time: f64,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
-    let current_force = multiply_3d_vector_by_scalar(
+    let current_force = multiply_vector_by_scalar(
         input_json.driving_amplitude,
         (input_json.driving_frequency * current_time + input_json.driving_phase).cos(),
     );
@@ -88,7 +93,7 @@ fn update_particles(
     for y in 0..particles[0].len() {
         for z in 0..particles[0][y].len() {
             particles[0][y][z].acceleration =
-                multiply_3d_vector_by_scalar(current_force, 1.0 / particles[0][y][z].mass);
+                multiply_vector_by_scalar(current_force, 1.0 / particles[0][y][z].mass);
         }
     }
 }
@@ -129,5 +134,9 @@ fn main() {
                 );
             }
         }
+    }
+
+    for i in 0..input_json.total_time_steps {
+        let time = (i as f64) * input_json.time_step_size;
     }
 }
