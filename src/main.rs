@@ -12,7 +12,7 @@ pub struct InputJson {
     /// Size of each time step in seconds (s).
     time_step_size: f64,
     /// The total number of time steps to run.
-    total_num_time_steps: u32,
+    total_time_steps: u32,
     /// The number of [`Particle`]s in each direction: x, y, and z.
     dimensions: [usize; 3],
     /// The distance between [`Particle`]s in each direction.
@@ -23,8 +23,8 @@ pub struct InputJson {
     /// The spring constant between each pair of particles,
     /// measured in newtons per meter (N/m).
     spring_constant: f64,
-    /// The damping coefficient of the springs in newton-seconds per meter
-    /// (N⋅s⋅m⁻¹).
+    /// The damping coefficient of the springs
+    /// in newton-seconds per meter (N⋅s⋅m⁻¹).
     damping: f64,
     /// The amplitude of the driving force as a 3D vector
     /// measured in newtons (N).
@@ -75,14 +75,12 @@ fn multiply_3d_vector_by_scalar(array: [f64; 3], scalar: f64) -> [f64; 3] {
 fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
-    current_time_step: f64,
+    current_time: f64,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
     let current_force = multiply_3d_vector_by_scalar(
         input_json.driving_amplitude,
-        (input_json.driving_frequency * input_json.time_step_size * current_time_step
-            + input_json.driving_phase)
-            .cos(),
+        (input_json.driving_frequency * current_time + input_json.driving_phase).cos(),
     );
 
     // Set the acceleration based on the driving force.
