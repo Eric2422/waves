@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
 use std::{env, fs};
 
-use crate::particle::{Particle, ParticleBuilder};
+use serde::{Deserialize, Serialize};
 
-mod particle;
 mod array_math;
-
+mod particle;
+use crate::particle::{Particle, ParticleBuilder};
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]

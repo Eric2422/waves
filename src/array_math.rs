@@ -1,5 +1,5 @@
-/// Module of functions to perform calculations on would be considered 3D
-/// vectors in physics, but three-element arrays in Rust
+//! Module of functions to perform calculations on would be considered 3D
+//! vectors in physics, but three-element arrays in Rust
 
 /// Add two 3D vectors together, returning the vector sum.
 /// *Neither* of the original arrays are modified.
@@ -32,9 +32,9 @@ pub fn multiply_array_by_scalar(array: [f64; 3], scalar: f64) -> [f64; 3] {
 }
 
 /// Calculate the magnitude of the given 3D vector.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// // Returns approximately 5.0.
 /// let magnitude = calculate_array_magnitude([3, 4, 0]);
