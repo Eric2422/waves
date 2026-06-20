@@ -2,7 +2,7 @@ use std::{env, fs};
 
 use serde::{Deserialize, Serialize};
 
-mod array_math;
+mod vector3d;
 mod particle;
 use crate::particle::{Particle, ParticleBuilder};
 
@@ -48,7 +48,7 @@ fn update_particles(
     current_time: f64,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
-    let current_force = array_math::multiply_array_by_scalar(
+    let current_force = vector3d::multiply_array_by_scalar(
         input_json.driving_amplitude,
         (input_json.driving_frequency * current_time + input_json.driving_phase).cos(),
     );
@@ -58,7 +58,7 @@ fn update_particles(
     for y in 0..particles[0].len() {
         for z in 0..particles[0][y].len() {
             particles[0][y][z].acceleration =
-                array_math::divide_array_by_scalar(current_force, particles[0][y][z].mass);
+                vector3d::divide_array_by_scalar(current_force, particles[0][y][z].mass);
         }
     }
 }
