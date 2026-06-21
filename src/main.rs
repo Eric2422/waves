@@ -51,9 +51,9 @@ fn calculate_spring_force(
     let center_particle = &particles[center_x][center_y][center_z];
 
     // Start from the bottom back-left corner of the neighboring particles.
-    let start_x = if center_x > 0 { center_x - 1 } else { center_x };
-    let start_y = if center_y > 0 { center_y - 1 } else { center_y };
-    let start_z = if center_z > 0 { center_z - 1 } else { center_z };
+    let start_x = cmp::max(center_x - 1, center_x);
+    let start_y = cmp::max(center_y - 1, center_y);
+    let start_z = cmp::max(center_z - 1, center_z);
 
     // Prevent from going out of bounds.
     let end_x = cmp::min(start_x + 3, particles.len());
