@@ -3,10 +3,10 @@
 
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+
 /// A 3D vector with x, y, and z values.
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vector3d(pub f64, pub f64, pub f64);
-
 
 /// Unpacks a three-element [`f64`] array into a [`Vector3d`].
 #[macro_export]

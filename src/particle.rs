@@ -1,3 +1,5 @@
+//! Module to represent [`Particle`]s in a longitudinal wave.
+
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
