@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::{cmp, env, fs};
 
 use serde::{Deserialize, Serialize};
 
@@ -37,6 +37,49 @@ pub struct InputJson {
     driving_phase: f64,
 }
 
+/// Calculate the total spring force from the surrounding [`Particle`]s acting
+/// upon the [`Particle`] at `particle_indices in `particles`.
+fn calculate_spring_force(
+    particles: &mut Vec<Vec<Vec<Particle>>>,
+    particle_indices: [usize; 3],
+    spring_constant: f64,
+) -> Vector3d {
+    let center_x = particle_indices[0];
+    let center_y = particle_indices[1];
+    let center_z = particle_indices[2];
+
+    let center_particle = &particles[center_x][center_y][center_z];
+
+    // Start from the bottom back-left corner of the neighboring particles.
+    let start_x = if center_x > 0 { center_x - 1 } else { center_x };
+    let start_y = if center_y > 0 { center_y - 1 } else { center_y };
+    let start_z = if center_z > 0 { center_z - 1 } else { center_z };
+
+    // Prevent from going out of bounds.
+    let end_x = cmp::min(start_x + 3, particles.len());
+
+    // Sum spring force from all neighboring particles.
+    let mut total_force = Vector3d(0.0, 0.0, 0.0);
+    for x in start_x..end_x {
+        let end_y = cmp::min(start_y + 3, particles[x].len());
+
+        for y in start_y..end_y {
+            let end_z = cmp::min(start_z + 3, particles[x][y].len());
+
+            for z in start_z..end_z {
+                // Add the force if it is not the center particle.
+                total_force += if *center_particle == particles[x][y][z] {
+                    Vector3d::zero()
+                } else {
+                    -spring_constant * (center_particle.position - particles[x][y][z].position)
+                }
+            }
+        }
+    }
+
+    total_force
+}
+
 /// Update the current [`acceleration`], [`velocity`], and [`position`] of the
 /// [`Particle`]s.
 ///
@@ -49,14 +92,21 @@ fn update_particles(
     current_time: f64,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
-    let current_force = vector_3d!(input_json.driving_amplitude)
+    let driving_force = vector_3d!(input_json.driving_amplitude)
         * (input_json.driving_frequency * current_time + input_json.driving_phase).cos();
 
-    // Set the acceleration based on the driving force.
-    // The forces from any springs will be added later.
-    for y in 0..particles[0].len() {
-        for z in 0..particles[0][y].len() {
-            particles[0][y][z].acceleration = current_force / particles[0][y][z].mass;
+    // Apply forces to all particles.
+    for x in 0..particles.len() {
+        for y in 0..particles[x].len() {
+            for z in 0..particles[x][y].len() {
+                let mut total_force =
+                    calculate_spring_force(particles, [x, y, z], input_json.spring_constant);
+
+                // Add the driving force to particles at the start end.
+                if x == 0 {
+                    total_force += driving_force;
+                }
+            }
         }
     }
 }
@@ -100,6 +150,8 @@ fn main() {
     }
 
     for i in 0..input_json.total_time_steps {
-        let time = (i as f64) * input_json.time_step_size;
+        let current_time = (i as f64) * input_json.time_step_size;
+
+        update_particles(&mut particles, &input_json, current_time);
     }
 }

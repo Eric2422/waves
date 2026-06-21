@@ -1,7 +1,10 @@
 //! Module of functions to perform calculations on would be considered 3D
 //! vectors in physics, but three-element arrays in Rust
 
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::{
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    sync::mpsc::RecvTimeoutError,
+};
 
 
 /// A 3D vector with x, y, and z values.
@@ -163,6 +166,11 @@ impl DivAssign<f64> for Vector3d {
 }
 
 impl Vector3d {
+    /// Return the zero vector, i.e., `Vector3d(0.0, 0.0, 0.0)`.
+    pub fn zero() -> Vector3d {
+        Vector3d(0.0, 0.0, 0.0)
+    }
+
     /// Calculate the magnitude of this [3D vector].
     ///
     /// [3D vector]: Vector3d

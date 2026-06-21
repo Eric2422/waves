@@ -21,7 +21,7 @@ pub struct Particle {
     /// The mass of this particle in kilograms (kg).
     pub mass: f64,
     /// The position of this particle as a 3D vector in meters (m).
-    position: Vector3d,
+    pub position: Vector3d,
     /// The velocity of this particle as a 3D vector in meters per second (m/s).
     velocity: Vector3d,
     /// The acceleration of this particle as a 3D vector
