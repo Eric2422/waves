@@ -28,8 +28,8 @@ impl Add for Vector3d {
     /// # Examples
     ///
     /// ```rust
-    /// // Returns [4, 4, 4].
-    /// Vector3d(1, 2, 3) + Vector3d(3, 2, 1)
+    /// // Ignoring possible floating point errors, returns Vector3d(4.0, 4.0, 4.0).
+    /// Vector3d(1.0, 2.0, 3.0) + Vector3d(3.0, 2.0, 1.0)
     /// ```
     fn add(self, rhs: Self) -> Self::Output {
         Vector3d(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
@@ -89,6 +89,10 @@ impl Mul<f64> for Vector3d {
 
     /// Returns the product between this [3D vector] and a scalar.
     ///
+    /// ```rust
+    /// // Returns Vector3d(10.0, 20.0, 30.0).
+    /// Vector3d(1.0, 2.0, 3.0) * 10.0
+    /// ```
     /// [3D vector]: Vector3d
     fn mul(self, rhs: f64) -> Self::Output {
         Vector3d(self.0 * rhs, self.1 * rhs, self.2 * rhs)
@@ -132,7 +136,16 @@ impl Div<f64> for Vector3d {
     /// Return the result of this [3D vector] divided by a scalar, without
     /// mutating the [3D vector].
     ///
+    /// Has less floating point error than [multiplying] by the inverse.
+    ///
     /// [3D vector]: Vector3d
+    /// [multiplying]: Vector3d::mul
+    ///
+    /// # Examples
+    /// ```rust
+    /// // Returns approximately [2, 4, 6]
+    /// Vector3d(10, 20, 30) / 5
+    /// ```
     fn div(self, rhs: f64) -> Self::Output {
         Vector3d(self.0 / rhs, self.1 / rhs, self.2 / rhs)
     }
@@ -149,60 +162,18 @@ impl DivAssign<f64> for Vector3d {
     }
 }
 
-/// Add two 3D vectors together, returning the vector sum.
-/// *Neither* of the original arrays are modified.
-///
-/// # Examples
-///
-/// ```rust
-/// // Returns [4, 4, 4].
-/// add_arrays([1, 2, 3], [3, 2, 1])
-/// ```
-pub fn add_arrays(array1: [f64; 3], array2: [f64; 3]) -> [f64; 3] {
-    [
-        array1[0] + array2[0],
-        array1[1] + array2[1],
-        array1[2] + array2[2],
-    ]
-}
-
-/// Multiply a 3D vector by a scalar value, returning the product.
-/// The original array is *not* modified.
-///
-/// # Examples
-///
-/// ```rust
-/// // Returns [10, 20, 30].
-/// multiply_array_by_scalar([1, 2, 3], 10)
-/// ```
-pub fn multiply_array_by_scalar(array: [f64; 3], scalar: f64) -> [f64; 3] {
-    [array[0] * scalar, array[1] * scalar, array[2] * scalar]
-}
-
-/// Divide a 3D vector by a scalar value, returning the dividend. The original
-/// array is *not* modified.
-///
-/// It is prefereable to use this function rather than use
-/// [`multiply_array_by_scalar()`] with the scalar inverse due to floating point
-/// error.
-///
-/// # Examples
-/// ```rust
-/// // Returns approximately [2, 4, 6]
-/// divide_array_by_scalar([10, 20, 30], 5)
-/// ```
-pub fn divide_array_by_scalar(array: [f64; 3], scalar: f64) -> [f64; 3] {
-    [array[0] / scalar, array[1] / scalar, array[2] / scalar]
-}
-
-/// Calculate the magnitude of the given 3D vector.
-///
-/// # Examples
-///
-/// ```rust
-/// // Returns approximately 5.0.
-/// calculate_array_magnitude([3, 4, 0])
-/// ```
-pub fn calculate_array_magnitude(array: [f64; 3]) -> f64 {
-    (array[0].powi(2) + array[1].powi(2) + array[2].powi(2)).sqrt()
+impl Vector3d {
+    /// Calculate the magnitude of this [3D vector].
+    ///
+    /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// // Returns approximately 5.0.
+    /// Vector3d(3, 4, 0)
+    /// ```
+    pub fn calculate_magnitude(&self) -> f64 {
+        (self.0.powi(2) + self.1.powi(2) + self.2.powi(2)).sqrt()
+    }
 }
