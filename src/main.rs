@@ -2,11 +2,10 @@ use std::{env, fs};
 
 use serde::{Deserialize, Serialize};
 
-use crate::vector3d::Vector3d;
-
 mod particle;
 use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
+use crate::vector3d::Vector3d;
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
