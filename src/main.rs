@@ -1,3 +1,4 @@
+use std::path::{Path, PathBuf};
 use std::{cmp, env, fs};
 
 use serde::{Deserialize, Serialize};
@@ -6,6 +7,7 @@ mod particle;
 use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
 use crate::vector3d::Vector3d;
+
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -148,16 +150,30 @@ fn update_particles(
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    if args.len() < 2 {
+        panic!(
+            "Error: No input file provided. Usage: `./target/debug/longitudinal_waves.exe input/<file name>`"
+        );
+    }
+
+    let input_file = Path::new(&args[1]);
+
     // Attempt to retreive the contents of the file.
-    let file_contents = match fs::read_to_string(&args[1]) {
+    let file_contents = match fs::read_to_string(input_file) {
         Ok(file_contents) => file_contents,
-        Err(_) => panic!("Error: File `{}` could not be read.", &args[1]),
+        Err(_) => panic!(
+            "Error: File `{:?}` could not be read. Check if the file exists.",
+            input_file
+        ),
     };
 
     // Attempt to parse the file into usable data.
     let input_json: InputJson = match serde_json::from_str(&file_contents) {
         Ok(input_json) => input_json,
-        Err(_) => panic!("Error: File `{}` is malformatted.", &args[1]),
+        Err(_) => panic!(
+            "Error: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample.",
+            &args[1]
+        ),
     };
 
     // Create a grid of identical particles.
@@ -185,6 +201,8 @@ fn main() {
 
     for i in 0..input_json.total_time_steps {
         let current_time = (i as f64) * input_json.time_step_size;
+
+        // fs::write(path, contents);
 
         update_particles(&mut particles, &input_json, current_time);
     }
