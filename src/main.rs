@@ -18,7 +18,7 @@ pub struct InputJson {
     dimensions: [usize; 3],
     /// The distance between [`Particle`]s in each direction.
     /// Measured in meters (m).
-    distance: [f64; 3],
+    spring_lengths: [f64; 3],
     /// The mass of each individual [`Particle`] in kilograms (kg).
     mass: f64,
     /// The spring constant between each pair of particles,
@@ -42,6 +42,7 @@ pub struct InputJson {
 fn calculate_spring_force(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     particle_indices: [usize; 3],
+    spring_lengths: [f64; 3],
     spring_constant: f64,
 ) -> Vector3d {
     let center_x = particle_indices[0];
@@ -70,10 +71,18 @@ fn calculate_spring_force(
 
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
-                total_force += if *center_particle == particles[x][y][z] {
-                    Vector3d::zero()
-                } else {
-                    -spring_constant * (center_particle.position - particles[x][y][z].position)
+                if x != center_x && y != center_y && z != center_z {
+                    let distance_vector = center_particle.position - particles[x][y][z].position;
+                    let rest_distance = Vector3d(
+                        (x - center_x) as f64 * spring_lengths[0],
+                        (y - center_y) as f64 * spring_lengths[1],
+                        (z - center_z) as f64 * spring_lengths[2],
+                    )
+                    .get_magnitude();
+
+                    total_force += -spring_constant
+                        * (distance_vector.get_magnitude() - rest_distance)
+                        * distance_vector.get_normalized();
                 }
             }
         }
@@ -101,8 +110,12 @@ fn update_particles(
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
-                let mut total_force =
-                    calculate_spring_force(particles, [x, y, z], input_json.spring_constant);
+                let mut total_force = calculate_spring_force(
+                    particles,
+                    [x, y, z],
+                    input_json.spring_lengths,
+                    input_json.spring_constant,
+                );
 
                 // Add the driving force to particles at the start end.
                 if x == 0 {
@@ -157,9 +170,9 @@ fn main() {
                     ParticleBuilder::new()
                         .set_mass(input_json.mass)
                         .set_position(
-                            (x as f64) * input_json.distance[0],
-                            (y as f64) * input_json.distance[1],
-                            (z as f64) * input_json.distance[2],
+                            (x as f64) * input_json.spring_lengths[0],
+                            (y as f64) * input_json.spring_lengths[1],
+                            (z as f64) * input_json.spring_lengths[2],
                         )
                         .build(),
                 );
