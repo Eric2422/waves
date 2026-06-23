@@ -339,6 +339,11 @@ fn main() {
     for i in 0..input_json.total_time_steps {
         let current_time = (i as f64) * input_json.time_step_size;
 
+        match fs::write(&output_file, format!("\nt = {:?}", current_time)) {
+            Ok(_) => {}
+            Err(_) => println!("Failed to write to {:?}", output_file),
+        }
+
         update_particles(&mut particles, &input_json, current_time);
     }
 }
