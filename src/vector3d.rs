@@ -1,10 +1,7 @@
 //! Module of functions to perform calculations on would be considered 3D
 //! vectors in physics, but three-element arrays in Rust
 
-use std::{
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
-    sync::mpsc::RecvTimeoutError,
-};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 
 /// A 3D vector with x, y, and z values.
@@ -181,7 +178,14 @@ impl Vector3d {
     /// // Returns approximately 5.0.
     /// Vector3d(3, 4, 0)
     /// ```
-    pub fn calculate_magnitude(&self) -> f64 {
+    pub fn get_magnitude(&self) -> f64 {
         (self.0.powi(2) + self.1.powi(2) + self.2.powi(2)).sqrt()
+    }
+
+    /// Return the normalized unit vector of this [3D vector].
+    ///
+    /// [3D vector]: Vector3d
+    pub fn get_normalized(&self) -> Vector3d {
+        *self / self.get_magnitude()
     }
 }
