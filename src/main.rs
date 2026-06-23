@@ -315,8 +315,7 @@ fn main() {
 
             for z in 0..input_json.dimensions[2] {
                 particles[x][y].push(
-                    ParticleBuilder::new()
-                        .set_mass(input_json.mass)
+                    ParticleBuilder::new(input_json.mass)
                         .set_position(
                             (x as f64) * input_json.spring_lengths[0],
                             (y as f64) * input_json.spring_lengths[1],

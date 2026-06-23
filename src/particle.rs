@@ -120,9 +120,16 @@ impl ParticleBuilder {
     /// Instantiate and return a new [`ParticleBuilder`] with a mass of 1.0 kg,
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
     /// acceleration of <0.0, 0.0, 0.0> m/s², and no linked [`Particle`]s.
-    pub fn new() -> ParticleBuilder {
+    pub fn new_1kg() -> ParticleBuilder {
+        ParticleBuilder::new(1.0)
+    }
+
+    /// Instantiate and return a new [`ParticleBuilder`] with a given mass,
+    /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
+    /// acceleration of <0.0, 0.0, 0.0> m/s², and no linked [`Particle`]s.
+    pub fn new(mass: f64) -> ParticleBuilder {
         ParticleBuilder {
-            mass: 1.0,
+            mass,
             position: Vector3d::zero(),
             velocity: Vector3d::zero(),
             linked_particles: HashMap::new(),
