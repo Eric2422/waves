@@ -1,6 +1,5 @@
 use core::panic;
-use std::path::Path;
-
+use std::path::{Path, PathBuf};
 use std::{cmp, env, fs};
 
 use serde::{Deserialize, Serialize};
@@ -102,9 +101,21 @@ fn calculate_spring_force(
     let center_particle = &particles[center_x][center_y][center_z];
 
     // Start from the bottom back-left corner of the neighboring particles.
-    let start_x = cmp::max(center_x - 1, center_x);
-    let start_y = cmp::max(center_y - 1, center_y);
-    let start_z = cmp::max(center_z - 1, center_z);
+    let start_x = if center_x == 0 {
+        center_x
+    } else {
+        center_x - 1
+    };
+    let start_y = if center_y == 0 {
+        center_y
+    } else {
+        center_y - 1
+    };
+    let start_z = if center_y == 0 {
+        center_y
+    } else {
+        center_y - 1
+    };
 
     // Prevent from going out of bounds.
     let end_x = cmp::min(start_x + 3, particles.len());
@@ -126,9 +137,9 @@ fn calculate_spring_force(
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the original resting distance.
                     let rest_distance = Vector3d(
-                        (x - center_x) as f64 * spring_lengths[0],
-                        (y - center_y) as f64 * spring_lengths[1],
-                        (z - center_z) as f64 * spring_lengths[2],
+                        (x as f64 - center_x as f64) * spring_lengths[0],
+                        (y as f64 - center_y as f64) * spring_lengths[1],
+                        (z as f64 - center_z as f64) * spring_lengths[2],
                     )
                     .get_magnitude();
 
@@ -205,6 +216,29 @@ fn main() {
     }
 
     let input_file = Path::new(&args[1]);
+    // Automatically generate the output file to have the same name but to be a .txt
+    // file in output/
+    let output_file: PathBuf = [
+        "output",
+        input_file
+            .with_extension("txt")
+            .file_stem()
+            .unwrap_or_else(|| {
+                panic!(
+                    "ERROR: Input file name {:?} is an invalid OS string.",
+                    input_file
+                )
+            })
+            .to_str()
+            .unwrap_or_else(|| {
+                panic!(
+                    "ERROR: Input file name {:?} is an invalid string.",
+                    input_file
+                )
+            }),
+    ]
+    .iter()
+    .collect();
 
     // Attempt to retreive the contents of the file.
     let file_contents = match fs::read_to_string(input_file) {
@@ -251,10 +285,16 @@ fn main() {
         }
     }
 
+    // Clear the output file and write the header.
+    match fs::write(&output_file, format!("Input file: {:?}", input_file)) {
+        Ok(_) => {}
+        Err(_) => {
+            println!("WARNING: Failed to write to output file {:?}", output_file)
+        }
+    }
+
     for i in 0..input_json.total_time_steps {
         let current_time = (i as f64) * input_json.time_step_size;
-
-        // fs::write(path, contents);
 
         update_particles(&mut particles, &input_json, current_time);
     }
