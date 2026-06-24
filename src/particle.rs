@@ -88,30 +88,9 @@ impl ToString for Particle {
 }
 
 impl Particle {
-    /// Create a new [`Particle`] based on the given [`ParticleBuilder`]
-    /// instance.
-    /// The [`id`] property will be assigned from the value stored in
-    /// [`PARTICLE_COUNTER`],
-    /// which increments by one (1) every time this function is called.
-    /// Thus, no two [`Particle`]s will have an identical [`id`].
-    ///
-    /// [`id`]: Particle::id
-    fn new(builder: ParticleBuilder) -> Particle {
-        let new_particle = Particle {
-            id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
-            mass: builder.mass,
-            position: builder.position,
-            velocity: builder.velocity,
-            acceleration: Vector3d(0.0, 0.0, 0.0),
-            linked_particles: builder.linked_particles,
-        };
-
-        new_particle
-    }
-
-    /// Instantiates and returns a new [`ParticleBuilder`].
+    /// Instantiates and returns a new default [`ParticleBuilder`].
     pub fn builder() -> ParticleBuilder {
-        ParticleBuilder::new()
+        ParticleBuilder::default()
     }
 }
 
@@ -119,7 +98,8 @@ impl Particle {
 /// A builder for the [`Particle`] class,
 /// allowing for a way to set the [`mass`], [`position`], [`velocity`],
 /// [`acceleration`], and [`linked_particles`].
-/// Note that since [`id`]s are predetermined in [`Particle::new()`],
+///
+/// Note that since [`id`]s are predetermined in [`ParticleBuilder::build()`],
 /// the builder does not come with a method to set the [`id`].
 ///
 /// [`mass`]: Particle::mass
@@ -128,6 +108,7 @@ impl Particle {
 /// [`acceleration`]: Particle::acceleration
 /// [`linked_particles`]: Particle::linked_particles
 /// [`id`]: Particle::id
+#[derive(Default)]
 pub struct ParticleBuilder {
     mass: f64,
     position: Vector3d,
@@ -139,11 +120,18 @@ impl ParticleBuilder {
     /// Instantiate and return a new [`ParticleBuilder`] with a mass of 1.0 kg,
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
     /// acceleration of <0.0, 0.0, 0.0> m/s², and no linked [`Particle`]s.
-    pub fn new() -> ParticleBuilder {
+    pub fn new_1kg() -> ParticleBuilder {
+        ParticleBuilder::new(1.0)
+    }
+
+    /// Instantiate and return a new [`ParticleBuilder`] with a given mass,
+    /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
+    /// acceleration of <0.0, 0.0, 0.0> m/s², and no linked [`Particle`]s.
+    pub fn new(mass: f64) -> ParticleBuilder {
         ParticleBuilder {
-            mass: 1.0,
-            position: Vector3d(0.0, 0.0, 0.0),
-            velocity: Vector3d(0.0, 0.0, 0.0),
+            mass,
+            position: Vector3d::zero(),
+            velocity: Vector3d::zero(),
             linked_particles: HashMap::new(),
         }
     }
@@ -166,7 +154,9 @@ impl ParticleBuilder {
     ///
     /// [`mass`]: Particle::mass
     pub fn set_mass(mut self, mass: f64) -> ParticleBuilder {
-        self.mass = mass;
+        if mass > 0.0 {
+            self.mass = mass;
+        };
         self
     }
 
@@ -244,12 +234,25 @@ impl ParticleBuilder {
     /// using the current values of [`mass`], [`position`], [`velocity`],
     /// [`acceleration`], and [`linked_particles`].
     ///
+    /// The [`id`] property will be assigned from the value stored in
+    /// [`PARTICLE_COUNTER`],
+    /// which increments by one (1) every time this function is called.
+    /// Thus, no two [`Particle`]s will have an identical [`id`].
+    ///
+    ///
     /// [`mass`]: Particle::mass
     /// [`position`]: Particle::position
     /// [`velocity`]: Particle::velocity
     /// [`acceleration`]: Particle::acceleration
     /// [`linked_particles`]: Particle::linked_particles
     pub fn build(self) -> Particle {
-        Particle::new(self)
+        Particle {
+            id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
+            mass: self.mass,
+            position: self.position,
+            velocity: self.velocity,
+            acceleration: Vector3d::zero(),
+            linked_particles: self.linked_particles,
+        }
     }
 }

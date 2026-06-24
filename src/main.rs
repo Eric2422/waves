@@ -1,4 +1,3 @@
-use core::panic;
 use std::path::{Path, PathBuf};
 use std::{cmp, env, fs};
 
@@ -40,33 +39,76 @@ pub struct InputJson {
     driving_phase: f64,
 }
 
-/// Check for various illogical input JSON settings.
-fn check_input_json(input_file: &Path, input_json: &mut InputJson) {
+/// Checks for various illogical input JSON settings.
+/// Correct time step size, mass, and spring constant to [`f64::MIN_POSITIVE`]
+/// if 0.0.
+/// Negate time step size, mass, spring constant, damping, and spring lengths if
+/// negative.
+fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     // Check for values that can not accept 0.
-    if input_json.time_step_size <= 0.0 {
-        panic!(
-            "ERROR: The time step size given in {:?} is {} s, but it should be positive.",
-            input_file, input_json.time_step_size
+    // If so, set it to be the minimum positive value.
+    if input_json.time_step_size == 0.0 {
+        println!(
+            "WARNING: The time step size given in {:?} is 0.0 s, but it should be non-zero.
+            Setting to the smallest positive value {} s.",
+            input_file_path,
+            f64::MIN_POSITIVE
         );
+        input_json.time_step_size = f64::MIN_POSITIVE;
     }
-    if input_json.mass <= 0.0 {
-        panic!(
-            "ERROR: The mass given in {:?} is {} kg, but it should be positive.",
-            input_file, input_json.mass
+    if input_json.mass == 0.0 {
+        println!(
+            "WARNING: The mass given in {:?} is 0.0 kg, but it should be non-zero.
+            Setting to the smallest positive value {} kg.",
+            input_file_path,
+            f64::MIN_POSITIVE
         );
+        input_json.mass = f64::MIN_POSITIVE;
     }
-    if input_json.spring_constant <= 0.0 {
-        panic!(
-            "ERROR: The spring constant given in {:?} is {} N/m, but it should be positive.",
-            input_file, input_json.spring_constant
+    if input_json.spring_constant == 0.0 {
+        println!(
+            "WARNING: The spring constant given in {:?} is 0.0 N/m, but it should be non-zero.
+            Setting to the smallest positive value {} N/m.",
+            input_file_path,
+            f64::MIN_POSITIVE
         );
+        input_json.spring_constant = f64::MIN_POSITIVE;
     }
 
-    // Set to positive if negative.
+    // For values that cannot accept a negative value, flip it to be positive.
+    if input_json.time_step_size < 0.0 {
+        println!(
+            "WARNING: The time step size given in {:?} is {} s, but it should be positive.
+            Assuming a positive value of {} s.",
+            input_file_path, input_json.time_step_size, -input_json.time_step_size
+        );
+        input_json.time_step_size = -input_json.time_step_size;
+    }
+    if input_json.mass < 0.0 {
+        println!(
+            "WARNING: The mass given in {:?} is {} kg, but it should be positive.
+            Assuming a positive value of {} kg.",
+            input_file_path,
+            input_json.mass,
+            f64::MIN_POSITIVE
+        );
+        input_json.mass = f64::MIN_POSITIVE;
+    }
+    if input_json.spring_constant < 0.0 {
+        println!(
+            "ERROR: The spring constant given in {:?} is {} N/m, but it should be positive.
+            Assuming a positive value of {} N/m.",
+            input_file_path,
+            input_json.spring_constant,
+            f64::MIN_POSITIVE
+        );
+        input_json.spring_constant = f64::MIN_POSITIVE;
+    }
     if input_json.damping < 0.0 {
         println!(
-            "WARNING: The damping given in {:?} is {} N⋅s⋅m⁻¹, but it should be non-negative.\nAssuming a positive value of {} N⋅s⋅m⁻¹.",
-            input_file, input_json.damping, -input_json.damping
+            "WARNING: The damping given in {:?} is {} N⋅s⋅m⁻¹, but it should be non-negative.
+            Assuming a positive value of {} N⋅s⋅m⁻¹.",
+            input_file_path, input_json.damping, -input_json.damping
         );
         input_json.damping = -input_json.damping;
     }
@@ -75,8 +117,9 @@ fn check_input_json(input_file: &Path, input_json: &mut InputJson) {
         || input_json.spring_lengths[2] < 0.0
     {
         println!(
-            "WARNING: The springs lengths given in {:?} are {:?} m, but they should be non-negative.\nAssuming positive values of {:?} m.",
-            input_file,
+            "WARNING: The springs lengths given in {:?} are {:?} m, but they should be non-negative.
+            Assuming positive values of {:?} m.",
+            input_file_path,
             input_json.spring_lengths,
             -vector_3d!(input_json.spring_lengths)
         );
@@ -86,7 +129,7 @@ fn check_input_json(input_file: &Path, input_json: &mut InputJson) {
     }
 }
 
-/// Calculate the total spring force from the surrounding [`Particle`]s acting
+/// Calculates the total spring force from the surrounding [`Particle`]s acting
 /// upon the [`Particle`] at `particle_indices in `particles`.
 fn calculate_spring_force(
     particles: &mut Vec<Vec<Vec<Particle>>>,
@@ -101,9 +144,21 @@ fn calculate_spring_force(
     let center_particle = &particles[center_x][center_y][center_z];
 
     // Start from the bottom back-left corner of the neighboring particles.
-    let start_x = cmp::max(center_x - 1, center_x);
-    let start_y = cmp::max(center_y - 1, center_y);
-    let start_z = cmp::max(center_z - 1, center_z);
+    let start_x = if center_x == 0 {
+        center_x
+    } else {
+        center_x - 1
+    };
+    let start_y = if center_y == 0 {
+        center_y
+    } else {
+        center_y - 1
+    };
+    let start_z = if center_y == 0 {
+        center_y
+    } else {
+        center_y - 1
+    };
 
     // Prevent from going out of bounds.
     let end_x = cmp::min(start_x + 3, particles.len());
@@ -125,9 +180,9 @@ fn calculate_spring_force(
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the original resting distance.
                     let rest_distance = Vector3d(
-                        (x - center_x) as f64 * spring_lengths[0],
-                        (y - center_y) as f64 * spring_lengths[1],
-                        (z - center_z) as f64 * spring_lengths[2],
+                        (x as f64 - center_x as f64) * spring_lengths[0],
+                        (y as f64 - center_y as f64) * spring_lengths[1],
+                        (z as f64 - center_z as f64) * spring_lengths[2],
                     )
                     .get_magnitude();
 
@@ -143,7 +198,7 @@ fn calculate_spring_force(
     total_force
 }
 
-/// Update the current [`acceleration`], [`velocity`], and [`position`] of the
+/// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
 /// [`Particle`]s.
 ///
 /// [`acceleration`]: Particle::acceleration
@@ -204,6 +259,29 @@ fn main() {
     }
 
     let input_file = Path::new(&args[1]);
+    // Automatically generate the output file to have the same name
+    // but to be a .txt file in `output/`.
+    let output_file: PathBuf = [
+        "output",
+        input_file
+            .with_extension("txt")
+            .file_stem()
+            .unwrap_or_else(|| {
+                panic!(
+                    "ERROR: Input file name {:?} is an invalid OS string.",
+                    input_file
+                )
+            })
+            .to_str()
+            .unwrap_or_else(|| {
+                panic!(
+                    "ERROR: Input file name {:?} is an invalid string.",
+                    input_file
+                )
+            }),
+    ]
+    .iter()
+    .collect();
 
     // Attempt to retreive the contents of the file.
     let file_contents = match fs::read_to_string(input_file) {
@@ -225,6 +303,8 @@ fn main() {
 
     check_input_json(input_file, &mut input_json);
 
+    println!("Passed all checks");
+
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
     for x in 0..input_json.dimensions[0] {
@@ -235,8 +315,7 @@ fn main() {
 
             for z in 0..input_json.dimensions[2] {
                 particles[x][y].push(
-                    ParticleBuilder::new()
-                        .set_mass(input_json.mass)
+                    ParticleBuilder::new(input_json.mass)
                         .set_position(
                             (x as f64) * input_json.spring_lengths[0],
                             (y as f64) * input_json.spring_lengths[1],
@@ -248,10 +327,21 @@ fn main() {
         }
     }
 
+    // Clear the output file and write the header.
+    match fs::write(&output_file, format!("Input file: {:?}", input_file)) {
+        Ok(_) => {}
+        Err(_) => {
+            println!("WARNING: Failed to write to output file {:?}", output_file)
+        }
+    }
+
     for i in 0..input_json.total_time_steps {
         let current_time = (i as f64) * input_json.time_step_size;
 
-        // fs::write(path, contents);
+        match fs::write(&output_file, format!("\nt = {:?}", current_time)) {
+            Ok(_) => {}
+            Err(_) => println!("Failed to write to {:?}", output_file),
+        }
 
         update_particles(&mut particles, &input_json, current_time);
     }
