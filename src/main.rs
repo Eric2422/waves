@@ -97,7 +97,7 @@ Assuming a positive value of {} kg.",
     }
     if input_json.spring_constant < 0.0 {
         println!(
-            "ERROR: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive.
+            "ERROR: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive!
 Assuming a positive value of {} N/m.",
             input_json.spring_constant,
             -input_json.spring_constant
@@ -253,7 +253,7 @@ fn main() {
 
     if args.len() < 2 {
         panic!(
-            "ERROR: No input file provided. Usage: `./target/debug/longitudinal_waves.exe input/<file name>`"
+            "ERROR: No input file provided. Usage: `./target/debug/longitudinal_waves!exe input/<file name>`"
         );
     }
 
@@ -266,11 +266,11 @@ fn main() {
             .with_extension("txt")
             .file_name()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file_path:?} is an invalid OS string.")
+                panic!("ERROR: Input file name {input_file_path:?} is an invalid OS string!")
             })
             .to_str()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file_path:?} is an invalid string.")
+                panic!("ERROR: Input file name {input_file_path:?} is an invalid string!")
             }),
     ]
     .iter()
@@ -279,7 +279,7 @@ fn main() {
     // Attempt to retreive the contents of the file.
     let file_contents = fs::read_to_string(input_file_path).unwrap_or_else(|_| {
         panic!(
-            "ERROR: File `{input_file_path:?}` could not be read. Try checking if the file exists."
+            "ERROR: File `{input_file_path:?}` could not be read. Try checking if the file exists!"
         )
     });
 
@@ -287,7 +287,7 @@ fn main() {
     let mut input_json: InputJson= serde_json::from_str(&file_contents)
         .unwrap_or_else(
             |_| panic!(
-                "ERROR: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample.",
+                "ERROR: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample!",
                 &args[1]
             )
         );
@@ -304,7 +304,7 @@ fn main() {
         .open(&output_file_path)
         .unwrap_or_else(|_| {
             panic!(
-                "ERROR: Unable to create or open {:?}.
+                "ERROR: Unable to create or open {:?}!
 Try checking if the output/ directory exists.",
                 output_file_path
             );
