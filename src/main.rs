@@ -298,15 +298,14 @@ fn main() {
 
     // Try to create or access the output file.
     let mut output_file = fs::File::options()
+        .write(true)
         .create(true)
-        .truncate(true)
-        .append(true)
         .open(&output_file_path)
         .unwrap_or_else(|_| {
             panic!(
                 "ERROR: Unable to create or open {:?}!
 Try checking if the output/ directory exists.",
-                output_file_path
+                "test.txt"
             );
         });
     writeln!(output_file, "Input: {input_file_path:?}")
