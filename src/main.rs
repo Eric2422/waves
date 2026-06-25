@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{cmp, env, fs};
 
@@ -8,6 +9,10 @@ use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
 use crate::vector3d::Vector3d;
 
+/// The [`str`] representation of the output directory.
+/// A [`Path`] would be easier to work with,
+/// but [`Path`]s can not be instantiated statically.
+static OUTPUT_DIR_STRING: &str = "output";
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -49,7 +54,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     // If so, set it to be the minimum positive value.
     if input_json.time_step_size == 0.0 {
         println!(
-            "WARNING: The time step size given in {input_file_path:?} is 0.0 s, but it should be non-zero.
+            "Warning: The time step size given in {input_file_path:?} is 0.0 s, but it should be non-zero.
             Setting to the smallest positive value {} s.",
             f64::MIN_POSITIVE
         );
@@ -57,7 +62,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     }
     if input_json.mass == 0.0 {
         println!(
-            "WARNING: The mass given in {input_file_path:?} is 0.0 kg, but it should be non-zero.
+            "Warning: The mass given in {input_file_path:?} is 0.0 kg, but it should be non-zero.
             Setting to the smallest positive value {} kg.",
             f64::MIN_POSITIVE
         );
@@ -65,7 +70,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     }
     if input_json.spring_constant == 0.0 {
         println!(
-            "WARNING: The spring constant given in {input_file_path:?} is 0.0 N/m, but it should be non-zero.
+            "Warning: The spring constant given in {input_file_path:?} is 0.0 N/m, but it should be non-zero.
             Setting to the smallest positive value {} N/m.",
             f64::MIN_POSITIVE
         );
@@ -75,7 +80,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     // For values that cannot accept a negative value, flip it to be positive.
     if input_json.time_step_size < 0.0 {
         println!(
-            "WARNING: The time step size given in {input_file_path:?} is {} s, but it should be positive.
+            "Warning: The time step size given in {input_file_path:?} is {} s, but it should be positive.
             Assuming a positive value of {} s.",
             input_json.time_step_size,
             -input_json.time_step_size
@@ -84,7 +89,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     }
     if input_json.mass < 0.0 {
         println!(
-            "WARNING: The mass given in {input_file_path:?} is {} kg, but it should be positive.
+            "Warning: The mass given in {input_file_path:?} is {} kg, but it should be positive.
             Assuming a positive value of {} kg.",
             input_json.mass, -input_json.mass
         );
@@ -101,7 +106,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
     }
     if input_json.damping < 0.0 {
         println!(
-            "WARNING: The damping given in {input_file_path:?} is {} N⋅s⋅m⁻¹, but it should be non-negative.
+            "Warning: The damping given in {input_file_path:?} is {} N⋅s⋅m⁻¹, but it should be non-negative.
             Assuming a positive value of {} N⋅s⋅m⁻¹.",
             input_json.damping, -input_json.damping
         );
@@ -112,7 +117,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
         || input_json.spring_lengths[2] < 0.0
     {
         println!(
-            "WARNING: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.
+            "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.
             Assuming positive values of {:?} m.",
             input_json.spring_lengths,
             -vector_3d!(input_json.spring_lengths)
@@ -252,45 +257,58 @@ fn main() {
         );
     }
 
-    let input_file = Path::new(&args[1]);
+    let input_file_path = Path::new(&args[1]);
     // Automatically generate the output file to have the same name
     // but to be a .txt file in `output/`.
-    let output_file: PathBuf = [
-        "output",
-        input_file
+    let output_file_path: PathBuf = [
+        OUTPUT_DIR_STRING,
+        input_file_path
             .with_extension("txt")
             .file_stem()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file:?} is an invalid OS string.")
+                panic!("ERROR: Input file name {input_file_path:?} is an invalid OS string.")
             })
             .to_str()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file:?} is an invalid string.")
+                panic!("ERROR: Input file name {input_file_path:?} is an invalid string.")
             }),
     ]
     .iter()
     .collect();
 
     // Attempt to retreive the contents of the file.
-    let file_contents = match fs::read_to_string(input_file) {
-        Ok(file_contents) => file_contents,
-        Err(_) => {
-            panic!("ERROR: File `{input_file:?}` could not be read. Check if the file exists.")
-        }
-    };
+    let file_contents = fs::read_to_string(input_file_path).unwrap_or_else(|_| {
+        panic!("ERROR: File `{input_file_path:?}` could not be read. Check if the file exists.")
+    });
 
     // Attempt to parse the file into usable data.
-    let mut input_json: InputJson = match serde_json::from_str(&file_contents) {
-        Ok(input_json) => input_json,
-        Err(_) => panic!(
-            "ERROR: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample.",
-            &args[1]
-        ),
-    };
+    let mut input_json: InputJson= serde_json::from_str(&file_contents)
+        .unwrap_or_else(
+            |_| panic!(
+                "ERROR: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample.",
+                &args[1]
+            )
+        );
 
-    check_input_json(input_file, &mut input_json);
+    check_input_json(input_file_path, &mut input_json);
 
-    println!("{input_file:?} passed all checks.");
+    println!("{input_file_path:?} passed all checks.");
+
+    // Try to create or access the output file.
+    let mut output_file = fs::File::options()
+        .create(true)
+        .truncate(true)
+        .append(true)
+        .open(&output_file_path)
+        .unwrap_or_else(|_| {
+            panic!(
+                "ERROR: Unable to create or open {:?}.
+                Try checking if the output/ directory exists.",
+                output_file_path
+            );
+        });
+    writeln!(output_file, "Input: {input_file_path:?}")
+        .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
 
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
@@ -314,21 +332,13 @@ fn main() {
         }
     }
 
-    // Clear the output file and write the header.
-    match fs::write(&output_file, format!("Input file: {input_file:?}")) {
-        Ok(_) => {}
-        Err(_) => {
-            println!("WARNING: Failed to write to output file {output_file:?}")
-        }
-    }
-
+    // Run the time steps.
     for i in 0..input_json.total_time_steps {
         let current_time = (i as f64) * input_json.time_step_size;
 
-        match fs::write(&output_file, format!("\nt = {current_time:?}")) {
-            Ok(_) => {}
-            Err(_) => println!("Failed to write to {output_file:?}"),
-        }
+        writeln!(output_file, "\nt = {current_time:?}").unwrap_or_else(|_| {
+            println!("WARNING: Failed to write to {output_file_path:?}.");
+        });
 
         update_particles(&mut particles, &input_json, current_time);
     }

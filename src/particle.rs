@@ -7,12 +7,10 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::vector3d::Vector3d;
 
-
 /// Counter for the [`id`] property of the [`Particle`] class.
 ///
 /// [`id`]: Particle::id
 static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
-
 
 /// A single particle in a longitudinal wave,
 /// each connected to other particles by linear springs.
@@ -93,7 +91,6 @@ impl Particle {
         ParticleBuilder::default()
     }
 }
-
 
 /// A builder for the [`Particle`] class,
 /// allowing for a way to set the [`mass`], [`position`], [`velocity`],

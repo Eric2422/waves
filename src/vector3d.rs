@@ -3,7 +3,6 @@
 
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-
 /// A 3D vector with x, y, and z values.
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct Vector3d(pub f64, pub f64, pub f64);
