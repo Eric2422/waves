@@ -131,14 +131,18 @@ Assuming a positive value of {} N⋅s⋅m⁻¹.",
         || input_json.spring_lengths[2] < 0.0
     {
         println!(
-            "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.
-Assuming positive values of {:?} m.",
-            input_json.spring_lengths,
-            -vector_3d!(input_json.spring_lengths)
+            "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.",
+            input_json.spring_lengths
         );
+
         input_json.spring_lengths[0] = (input_json.spring_lengths[0]).abs();
         input_json.spring_lengths[1] = (input_json.spring_lengths[1]).abs();
         input_json.spring_lengths[2] = (input_json.spring_lengths[2]).abs();
+        println!(
+            "\nAssuming positive values of {:?} m.",
+            input_json.spring_lengths
+        );
+
         passed_all_checks = false;
     }
 
