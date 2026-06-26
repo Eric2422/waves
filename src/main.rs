@@ -45,11 +45,18 @@ pub struct InputJson {
 }
 
 /// Checks for various illogical input JSON settings.
-/// Correct time step size, mass, and spring constant to [`f64::MIN_POSITIVE`]
+/// Corrects time step size, mass, and spring constant to [`f64::MIN_POSITIVE`]
 /// if 0.0.
-/// Negate time step size, mass, spring constant, damping, and spring lengths if
-/// negative.
-fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) {
+/// Sets time step size, mass, spring constant, damping, and spring lengths to
+/// their absolute values if negative.
+///
+/// If any such corrections are made, return [`false`]. Else, return [`true`].
+///
+/// [`false`]: bool
+/// [`true`]: bool
+fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) -> bool {
+    let mut passed_all_checks = true;
+
     // Check for values that can not accept 0.
     // If so, set it to be the minimum positive value.
     if input_json.time_step_size == 0.0 {
@@ -59,6 +66,7 @@ Setting to the smallest positive value {} s.",
             f64::MIN_POSITIVE
         );
         input_json.time_step_size = f64::MIN_POSITIVE;
+        passed_all_checks = false;
     }
     if input_json.mass == 0.0 {
         println!(
@@ -67,6 +75,7 @@ Setting to the smallest positive value {} kg.",
             f64::MIN_POSITIVE
         );
         input_json.mass = f64::MIN_POSITIVE;
+        passed_all_checks = false;
     }
     if input_json.spring_constant == 0.0 {
         println!(
@@ -75,6 +84,7 @@ Setting to the smallest positive value {} N/m.",
             f64::MIN_POSITIVE
         );
         input_json.spring_constant = f64::MIN_POSITIVE;
+        passed_all_checks = false;
     }
 
     // For values that cannot accept a negative value, flip it to be positive.
@@ -86,6 +96,7 @@ Assuming a positive value of {} s.",
             -input_json.time_step_size
         );
         input_json.time_step_size = -input_json.time_step_size;
+        passed_all_checks = false;
     }
     if input_json.mass < 0.0 {
         println!(
@@ -94,15 +105,17 @@ Assuming a positive value of {} kg.",
             input_json.mass, -input_json.mass
         );
         input_json.mass = -input_json.mass;
+        passed_all_checks = false;
     }
     if input_json.spring_constant < 0.0 {
         println!(
-            "ERROR: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive!
+            "Warning: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive.
 Assuming a positive value of {} N/m.",
             input_json.spring_constant,
             -input_json.spring_constant
         );
         input_json.spring_constant = -input_json.spring_constant;
+        passed_all_checks = false;
     }
     if input_json.damping < 0.0 {
         println!(
@@ -111,6 +124,7 @@ Assuming a positive value of {} N⋅s⋅m⁻¹.",
             input_json.damping, -input_json.damping
         );
         input_json.damping = -input_json.damping;
+        passed_all_checks = false;
     }
     if input_json.spring_lengths[0] < 0.0
         || input_json.spring_lengths[1] < 0.0
@@ -125,7 +139,10 @@ Assuming positive values of {:?} m.",
         input_json.spring_lengths[0] = (input_json.spring_lengths[0]).abs();
         input_json.spring_lengths[1] = (input_json.spring_lengths[1]).abs();
         input_json.spring_lengths[2] = (input_json.spring_lengths[2]).abs();
+        passed_all_checks = false;
     }
+
+    passed_all_checks
 }
 
 /// Calculates the total spring force from the surrounding [`Particle`]s acting
@@ -292,9 +309,10 @@ fn main() {
             )
         );
 
-    check_input_json(input_file_path, &mut input_json);
-
-    println!("{input_file_path:?} passed all checks.");
+    // Check for invalid values and correct them if found.
+    if check_input_json(input_file_path, &mut input_json) {
+        println!("{input_file_path:?} passed all checks.");
+    }
 
     // Try to create or access the output file.
     let mut output_file = fs::File::options()
