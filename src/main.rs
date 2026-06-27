@@ -228,6 +228,7 @@ fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: f64,
+    mut output_file: Option<fs::File>,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector_3d!(input_json.driving_amplitude)
@@ -264,6 +265,11 @@ fn update_particles(
 
                 let velocity = particles[x][y][z].velocity;
                 particles[x][y][z].position += velocity * input_json.time_step_size;
+
+                match output_file {
+                    Some(ref mut output_file) => writeln!(output_file, "").unwrap_or_else(|_| {}),
+                    None => {}
+                }
             }
         }
     }
@@ -367,7 +373,7 @@ Try checking if the output/ directory exists.",
         // Omit the calculations from the last step
         // since they will never be written anyway.
         if i < input_json.total_time_steps {
-            update_particles(&mut particles, &input_json, current_time);
+            update_particles(&mut particles, &input_json, current_time, None);
         }
     }
 }
