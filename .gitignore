@@ -2,6 +2,3 @@
 
 input/*
 !sample.json
-
-output/*
-!sample.txt
