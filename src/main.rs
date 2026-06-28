@@ -182,16 +182,14 @@ fn calculate_spring_force(
 
     // Prevent from going out of bounds.
     let end_x = cmp::min(start_x + 3, particles.len());
-    let mut end_y: usize;
-    let mut end_z: usize;
 
     // Sum spring force from all neighboring particles.
-    let mut total_force = Vector3d(0.0, 0.0, 0.0);
+    let mut total_force = vector_3d!(0.0, 0.0, 0.0);
     for x in start_x..end_x {
-        end_y = cmp::min(start_y + 3, particles[x].len());
+        let end_y = cmp::min(start_y + 3, particles[x].len());
 
         for y in start_y..end_y {
-            end_z = cmp::min(start_z + 3, particles[x][y].len());
+            let end_z = cmp::min(start_z + 3, particles[x][y].len());
 
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
@@ -199,10 +197,10 @@ fn calculate_spring_force(
                     // Get the current, stretched vector between the particles.
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the original resting distance.
-                    let rest_distance = Vector3d(
+                    let rest_distance = vector_3d!(
                         (x as f64 - center_x as f64) * spring_lengths[0],
                         (y as f64 - center_y as f64) * spring_lengths[1],
-                        (z as f64 - center_z as f64) * spring_lengths[2],
+                        (z as f64 - center_z as f64) * spring_lengths[2]
                     )
                     .get_magnitude();
 
@@ -219,8 +217,8 @@ fn calculate_spring_force(
 }
 
 /// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
-/// [`Particle`]s. 
-/// 
+/// [`Particle`]s.
+///
 /// If the value in `output_file` is [`None`], no output will be written.
 /// If it is [`Some`], output will written to the given [`File`].
 ///
@@ -242,12 +240,23 @@ fn update_particles(
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
+                // To avoid having to loop through again,
+                // output the `Particle` states to a file.
+                match output_file {
+                    Some(ref mut output_file) => {
+                        writeln!(output_file, "{}", particles[x][y][z]).unwrap_or_else(|_| {})
+                    }
+                    None => {}
+                }
+
                 let mut total_force = calculate_spring_force(
                     particles,
                     [x, y, z],
                     input_json.spring_lengths,
                     input_json.spring_constant,
                 );
+
+                total_force -= input_json.damping * particles[x][y][z].velocity;
 
                 // Add the driving force to particles at the start end.
                 if x == 0 {
@@ -269,15 +278,6 @@ fn update_particles(
 
                 let velocity = particles[x][y][z].velocity;
                 particles[x][y][z].position += velocity * input_json.time_step_size;
-
-                // To avoid having to loop through again,
-                // output the `Particle` states to a file.
-                match output_file {
-                    Some(ref mut output_file) => {
-                        writeln!(output_file, "{}", particles[x][y][z]).unwrap_or_else(|_| {})
-                    }
-                    None => {}
-                }
             }
         }
     }
