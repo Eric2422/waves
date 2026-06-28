@@ -182,16 +182,14 @@ fn calculate_spring_force(
 
     // Prevent from going out of bounds.
     let end_x = cmp::min(start_x + 3, particles.len());
-    let mut end_y: usize;
-    let mut end_z: usize;
 
     // Sum spring force from all neighboring particles.
     let mut total_force = Vector3d(0.0, 0.0, 0.0);
     for x in start_x..end_x {
-        end_y = cmp::min(start_y + 3, particles[x].len());
+        let end_y = cmp::min(start_y + 3, particles[x].len());
 
         for y in start_y..end_y {
-            end_z = cmp::min(start_z + 3, particles[x][y].len());
+            let end_z = cmp::min(start_z + 3, particles[x][y].len());
 
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
