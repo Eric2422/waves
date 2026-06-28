@@ -5,6 +5,7 @@ use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use crate::vector_3d;
 use crate::vector3d::Vector3d;
 
 /// Counter for the [`id`] property of the [`Particle`] class.
@@ -177,7 +178,7 @@ impl ParticleBuilder {
     ///
     /// [`position`]: Particle::position
     pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.position = Vector3d(x, y, z);
+        self.position = vector_3d!(x, y, z);
         self
     }
 
@@ -198,7 +199,7 @@ impl ParticleBuilder {
     ///
     /// [`velocity`]: Particle::velocity
     pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.velocity = Vector3d(x, y, z);
+        self.velocity = vector_3d!(x, y, z);
         self
     }
 
