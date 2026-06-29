@@ -19,7 +19,7 @@ pub struct Vector3d {
 ///
 /// [3D vector]: Vector3d
 #[macro_export]
-macro_rules! vector_3d {
+macro_rules! vector3d {
     ($array:expr) => {
         Vector3d {
             x: $array[0],

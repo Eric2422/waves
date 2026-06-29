@@ -184,7 +184,7 @@ fn calculate_spring_force(
     let end_x = cmp::min(start_x + 3, particles.len());
 
     // Sum spring force from all neighboring particles.
-    let mut total_force = vector_3d!(0.0, 0.0, 0.0);
+    let mut total_force = vector3d!(0.0, 0.0, 0.0);
     for x in start_x..end_x {
         let end_y = cmp::min(start_y + 3, particles[x].len());
 
@@ -197,7 +197,7 @@ fn calculate_spring_force(
                     // Get the current, stretched vector between the particles.
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the original resting distance.
-                    let rest_distance = vector_3d!(
+                    let rest_distance = vector3d!(
                         (x as f64 - center_x as f64) * spring_lengths[0],
                         (y as f64 - center_y as f64) * spring_lengths[1],
                         (z as f64 - center_z as f64) * spring_lengths[2]
@@ -233,7 +233,7 @@ fn update_particles(
     mut output_file: Option<&mut fs::File>,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
-    let driving_force = vector_3d!(input_json.driving_amplitude)
+    let driving_force = vector3d!(input_json.driving_amplitude)
         * (input_json.driving_frequency * current_time + input_json.driving_phase).cos();
 
     // Apply forces to all particles.
