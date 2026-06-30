@@ -213,25 +213,6 @@ where
     }
 }
 
-impl<D> Mul<Vector3d<D>> for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Quantity<D, uom::si::SI<f64>, f64>;
-
-    /// Return the dot product of this [3D vector] and another [3D vector].
-    ///
-    /// [3D vector]: Vector3d
-    fn mul(self, rhs: Vector3d<D>) -> Self::Output
-    where
-        D: Dimension,
-        <D as Dimension>::Kind: uom::Kind,
-    {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
-    }
-}
-
 impl<D> Div<f64> for Vector3d<D>
 where
     D: Dimension,
