@@ -8,7 +8,11 @@ repository = "https://github.com/Eric2422/longitudinal-waves"
 license = "MIT"
 
 [dependencies]
+uom = { version = "0.38.0", default-features = true, features = [
+    "autoconvert",
+    "f64",
+    "serde",
+] }
 nalgebra = "0.35.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
-uom = "0.38.0"

@@ -6,6 +6,8 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
+use uom;
+
 /// A 3D vector with x, y, and z values.
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct Vector3d {
