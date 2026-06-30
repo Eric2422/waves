@@ -5,13 +5,14 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use uom::si::{
-    f64::{Angle, AngularVelocity, Length, Mass, MassRate, SurfaceTension, Time},
-    length::meter,
-    mass::kilogram,
-    mass_rate::kilogram_per_second,
-    surface_tension::newton_per_meter,
-    time::second,
+use uom::{
+    ConstZero,
+    si::{
+        f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
+        mass::kilogram,
+        surface_tension::newton_per_meter,
+        time::second,
+    },
 };
 
 mod particle;
@@ -56,7 +57,7 @@ pub struct InputJson {
     damping: ViscousDamping,
     /// The amplitude of the driving force as a 3D vector
     /// measured in newtons (N).
-    driving_amplitude: [f64; 3],
+    driving_amplitude: [Force; 3],
     /// The angular frequency of the driving force
     /// in radians per second (rad/s).
     driving_angular_frequency: AngularVelocity,
@@ -79,7 +80,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) -> bool 
 
     // Check for values that can not accept 0.
     // If so, set it to be the minimum positive value.
-    if input_json.time_step_size == Time::new::<second>(0.0) {
+    if input_json.time_step_size == Time::ZERO {
         println!(
             "Warning: The time step size given in {input_file_path:?} is 0.0 s, but it should be non-zero.
 Setting to the smallest positive value {} s.",
@@ -88,7 +89,7 @@ Setting to the smallest positive value {} s.",
         input_json.time_step_size = Time::new::<second>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.mass == Mass::new::<kilogram>(0.0) {
+    if input_json.mass == Mass::ZERO {
         println!(
             "Warning: The mass given in {input_file_path:?} is 0.0 kg, but it should be non-zero.
 Setting to the smallest positive value {} kg.",
@@ -97,7 +98,7 @@ Setting to the smallest positive value {} kg.",
         input_json.mass = Mass::new::<kilogram>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.spring_constant == SpringConstant::new::<newton_per_meter>(0.0) {
+    if input_json.spring_constant == SpringConstant::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is 0.0 N/m, but it should be non-zero.
 Setting to the smallest positive value {} N/m.",
@@ -108,7 +109,7 @@ Setting to the smallest positive value {} N/m.",
     }
 
     // For values that cannot accept a negative value, flip it to be positive.
-    if input_json.time_step_size < Time::new::<second>(0.0) {
+    if input_json.time_step_size < Time::ZERO {
         println!(
             "Warning: The time step size given in {input_file_path:?} is {:?} s, but it should be positive.
 Assuming a positive value of {:?} s.",
@@ -118,7 +119,7 @@ Assuming a positive value of {:?} s.",
         input_json.time_step_size = -input_json.time_step_size;
         passed_all_checks = false;
     }
-    if input_json.mass < Mass::new::<kilogram>(0.0) {
+    if input_json.mass < Mass::ZERO {
         println!(
             "Warning: The mass given in {input_file_path:?} is {:?} kg, but it should be positive.
 Assuming a positive value of {:?} kg.",
@@ -127,7 +128,7 @@ Assuming a positive value of {:?} kg.",
         input_json.mass = -input_json.mass;
         passed_all_checks = false;
     }
-    if input_json.spring_constant < SpringConstant::new::<newton_per_meter>(0.0) {
+    if input_json.spring_constant < SpringConstant::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is {:?} N/m, but it should be positive.
 Assuming a positive value of {:?} N/m.",
@@ -137,7 +138,7 @@ Assuming a positive value of {:?} N/m.",
         input_json.spring_constant = -input_json.spring_constant;
         passed_all_checks = false;
     }
-    if input_json.damping < MassRate::new::<kilogram_per_second>(0.0) {
+    if input_json.damping < MassRate::ZERO {
         println!(
             "Warning: The damping given in {input_file_path:?} is {:?} N⋅s⋅m⁻¹, but it should be non-negative.
 Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
@@ -146,9 +147,9 @@ Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
         input_json.damping = -input_json.damping;
         passed_all_checks = false;
     }
-    if input_json.spring_lengths[0] < Length::new::<meter>(0.0)
-        || input_json.spring_lengths[1] < Length::new::<meter>(0.0)
-        || input_json.spring_lengths[2] < Length::new::<meter>(0.0)
+    if input_json.spring_lengths[0] < Length::ZERO
+        || input_json.spring_lengths[1] < Length::ZERO
+        || input_json.spring_lengths[2] < Length::ZERO
     {
         println!(
             "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.",
@@ -176,7 +177,7 @@ fn calculate_spring_force(
     particle_indices: [usize; 3],
     spring_lengths: [Length; 3],
     spring_constant: SpringConstant,
-) -> Vector3d {
+) -> Vector3d<Force> {
     let center_x = particle_indices[0];
     let center_y = particle_indices[1];
     let center_z = particle_indices[2];
@@ -204,7 +205,7 @@ fn calculate_spring_force(
     let end_x = cmp::min(start_x + 3, particles.len());
 
     // Sum spring force from all neighboring particles.
-    let mut total_force = vector3d!(0.0, 0.0, 0.0);
+    let mut total_force = vector3d!(Force::ZERO, Force::ZERO, Force::ZERO);
     for x in start_x..end_x {
         let end_y = cmp::min(start_y + 3, particles[x].len());
 
@@ -218,14 +219,14 @@ fn calculate_spring_force(
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the original resting distance.
                     let rest_distance = vector3d!(
-                        (x as f64 - center_x as f64) * spring_lengths[0].value,
-                        (y as f64 - center_y as f64) * spring_lengths[1].value,
-                        (z as f64 - center_z as f64) * spring_lengths[2].value
+                        (x as f64 - center_x as f64) * spring_lengths[0],
+                        (y as f64 - center_y as f64) * spring_lengths[1],
+                        (z as f64 - center_z as f64) * spring_lengths[2]
                     )
                     .get_magnitude();
 
                     // Apply Hooke's Law.
-                    total_force += -spring_constant.value
+                    total_force += -spring_constant
                         * (distance_vector.get_magnitude() - rest_distance)
                         * distance_vector.get_normalized();
                 }
@@ -252,13 +253,9 @@ fn update_particles(
     current_time: Time,
     mut output_file: Option<&mut fs::File>,
 ) {
-    let angle = input_json.driving_angular_frequency * current_time;
-
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(input_json.driving_amplitude)
-        * ((input_json.driving_angular_frequency * current_time).value
-            + input_json.driving_phase.value)
-            .cos();
+        * ((input_json.driving_angular_frequency * current_time) + input_json.driving_phase).cos();
 
     // Apply forces to all particles.
     for x in 0..particles.len() {
@@ -280,7 +277,7 @@ fn update_particles(
                     input_json.spring_constant,
                 );
 
-                total_force -= input_json.damping.value * particles[x][y][z].velocity;
+                total_force -= input_json.damping * particles[x][y][z].velocity;
 
                 // Add the driving force to particles at the start end.
                 if x == 0 {
@@ -298,10 +295,10 @@ fn update_particles(
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
                 let acceleration = particles[x][y][z].acceleration;
-                particles[x][y][z].velocity += acceleration * input_json.time_step_size.value;
+                particles[x][y][z].velocity += acceleration * input_json.time_step_size;
 
                 let velocity = particles[x][y][z].velocity;
-                particles[x][y][z].position += velocity * input_json.time_step_size.value;
+                particles[x][y][z].position += velocity * input_json.time_step_size;
             }
         }
     }
@@ -383,9 +380,9 @@ Try checking if the output/ directory exists.",
                 particles[x][y].push(
                     ParticleBuilder::new(input_json.mass)
                         .set_position(
-                            (x as f64) * input_json.spring_lengths[0].value,
-                            (y as f64) * input_json.spring_lengths[1].value,
-                            (z as f64) * input_json.spring_lengths[2].value,
+                            (x as f64) * input_json.spring_lengths[0],
+                            (y as f64) * input_json.spring_lengths[1],
+                            (z as f64) * input_json.spring_lengths[2],
                         )
                         .build(),
                 );
@@ -394,7 +391,7 @@ Try checking if the output/ directory exists.",
     }
 
     // Run the time steps.
-    let mut current_time = Time::new::<second>(0.0);
+    let mut current_time = Time::ZERO;
     for i in 0..=input_json.total_time_steps {
         writeln!(output_file, "\nTime step {i}, t = {current_time:?} s").unwrap_or_else(|_| {
             println!("WARNING: Failed to write to {output_file_path:?}.");

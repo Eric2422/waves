@@ -183,7 +183,7 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`position`]: Particle::position
-    pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
+    pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder {
         self.position = vector3d!(x, y, z);
         self
     }
@@ -204,7 +204,7 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`velocity`]: Particle::velocity
-    pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
+    pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder {
         self.velocity = vector3d!(x, y, z);
         self
     }
