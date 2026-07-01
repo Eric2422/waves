@@ -204,7 +204,7 @@ fn calculate_spring_force(
     let end_x = cmp::min(start_x + 3, particles.len());
 
     // Sum spring force from all neighboring particles.
-    let mut total_force = vector3d!(0.0, 0.0, 0.0);
+    let mut spring_force = vector3d!(0.0, 0.0, 0.0);
     for x in start_x..end_x {
         let end_y = cmp::min(start_y + 3, particles[x].len());
 
@@ -225,7 +225,7 @@ fn calculate_spring_force(
                     .get_magnitude();
 
                     // Apply Hooke's Law.
-                    total_force += -spring_constant.value
+                    spring_force += -spring_constant.value
                         * (distance_vector.get_magnitude() - rest_distance)
                         * distance_vector.get_normalized();
                 }
@@ -233,7 +233,7 @@ fn calculate_spring_force(
         }
     }
 
-    total_force
+    spring_force
 }
 
 /// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
@@ -287,7 +287,7 @@ fn update_particles(
                     total_force += driving_force;
                 }
 
-                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
+                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass;
             }
         }
     }
@@ -381,7 +381,7 @@ Try checking if the output/ directory exists.",
 
             for z in 0..input_json.dimensions[2] {
                 particles[x][y].push(
-                    ParticleBuilder::new(input_json.mass)
+                    ParticleBuilder::new(input_json.mass.value)
                         .set_position(
                             (x as f64) * input_json.spring_lengths[0].value,
                             (y as f64) * input_json.spring_lengths[1].value,
