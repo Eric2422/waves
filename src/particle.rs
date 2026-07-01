@@ -1,12 +1,18 @@
 //! Module to represent [`Particle`]s in a longitudinal wave.
 
-use std::collections::HashSet;
-use std::fmt::{Debug, Display};
-use std::hash::Hash;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{
+    collections::HashSet,
+    fmt::{Debug, Display},
+    hash::Hash,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
-use crate::vector_3d;
-use crate::vector3d::Vector3d;
+use uom::si::{
+    f64::{Length, Mass},
+    mass::kilogram,
+};
+
+use crate::{vector3d, vector3d::Vector3d};
 
 /// Counter for the [`id`] property of the [`Particle`] class.
 ///
@@ -64,7 +70,7 @@ impl Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Particle {}: m = {} kg, r = {} m, v = {} m/s, a = {} m/s²",
+            "Particle {}: m = {:?} kg, r = {} m, v = {} m/s, a = {} m/s²",
             self.id, self.mass, self.position, self.velocity, self.acceleration
         )
     }
@@ -177,7 +183,7 @@ impl ParticleBuilder {
     ///
     /// [`position`]: Particle::position
     pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.position = vector_3d!(x, y, z);
+        self.position = vector3d!(x, y, z);
         self
     }
 
@@ -198,7 +204,7 @@ impl ParticleBuilder {
     ///
     /// [`velocity`]: Particle::velocity
     pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.velocity = vector_3d!(x, y, z);
+        self.velocity = vector3d!(x, y, z);
         self
     }
 

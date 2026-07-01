@@ -6,6 +6,8 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
+use uom;
+
 /// A 3D vector with x, y, and z values.
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct Vector3d {
@@ -19,7 +21,7 @@ pub struct Vector3d {
 ///
 /// [3D vector]: Vector3d
 #[macro_export]
-macro_rules! vector_3d {
+macro_rules! vector3d {
     ($array:expr) => {
         Vector3d {
             x: $array[0],
