@@ -65,12 +65,12 @@ impl Display for InputJson {
 Total time steps: {}
 Time step size: {}
 Dimensions: {:?}
-Spring Lengths: ({}, {}, {}) {}
+Spring lengths: ({}, {}, {}) {}
 Spring constant: {}
 Damping: {}
 Driving parameters:
     Amplitude: ({}, {}, {}) {}
-    Angular Frequency: {}
+    Angular frequency: {}
     Phase: {}",
             self.total_time_steps,
             self.time_step_size.into_format_args(second, Abbreviation),
