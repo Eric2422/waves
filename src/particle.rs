@@ -7,7 +7,9 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use crate::{vector3d, vector3d::Vector3d};
+use uom::si::length::meter;
+
+use crate::{dimension, vector3d, vector3d::Vector3d};
 
 /// Counter for the [`id`] property of the [`Particle`] class.
 ///
@@ -223,7 +225,7 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`attached_springs`]: Particle::attached_springs
-    pub fn attach_spring(mut self, spring: Spring, spring_constant: f64) -> ParticleBuilder {
+    pub fn attach_spring(mut self, spring: Spring) -> ParticleBuilder {
         self.attached_springs.insert(spring);
         self
     }
@@ -260,8 +262,8 @@ impl ParticleBuilder {
 #[derive(Clone, Debug)]
 pub struct Spring {
     particles: [Particle; 2],
-    spring_constant: f64,
-    resting_length: f64,
+    spring_constant: dimension::SpringConstant,
+    resting_length: meter,
 }
 
 impl Hash for Spring {
