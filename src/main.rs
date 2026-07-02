@@ -5,13 +5,14 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use uom::si::{
-    f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
-    length::meter,
-    mass::kilogram,
-    mass_rate::kilogram_per_second,
-    surface_tension::newton_per_meter,
-    time::second,
+use uom::{
+    ConstZero,
+    si::{
+        f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
+        mass::kilogram,
+        surface_tension::newton_per_meter,
+        time::second,
+    },
 };
 
 mod particle;
@@ -81,7 +82,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) -> bool 
 
     // Check for values that can not accept 0.
     // If so, set it to be the minimum positive value.
-    if input_json.time_step_size == Time::new::<second>(0.0) {
+    if input_json.time_step_size == Time::ZERO {
         println!(
             "Warning: The time step size given in {input_file_path:?} is 0.0 s, but it should be non-zero.
 Setting to the smallest positive value {} s.",
@@ -90,7 +91,7 @@ Setting to the smallest positive value {} s.",
         input_json.time_step_size = Time::new::<second>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.mass == Mass::new::<kilogram>(0.0) {
+    if input_json.mass == Mass::ZERO {
         println!(
             "Warning: The mass given in {input_file_path:?} is 0.0 kg, but it should be non-zero.
 Setting to the smallest positive value {} kg.",
@@ -99,7 +100,7 @@ Setting to the smallest positive value {} kg.",
         input_json.mass = Mass::new::<kilogram>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.spring_constant == SpringConstant::new::<newton_per_meter>(0.0) {
+    if input_json.spring_constant == SpringConstant::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is 0.0 N/m, but it should be non-zero.
 Setting to the smallest positive value {} N/m.",
@@ -110,7 +111,7 @@ Setting to the smallest positive value {} N/m.",
     }
 
     // For values that cannot accept a negative value, flip it to be positive.
-    if input_json.time_step_size < Time::new::<second>(0.0) {
+    if input_json.time_step_size < Time::ZERO {
         println!(
             "Warning: The time step size given in {input_file_path:?} is {:?} s, but it should be positive.
 Assuming a positive value of {:?} s.",
@@ -120,7 +121,7 @@ Assuming a positive value of {:?} s.",
         input_json.time_step_size = -input_json.time_step_size;
         passed_all_checks = false;
     }
-    if input_json.mass < Mass::new::<kilogram>(0.0) {
+    if input_json.mass < Mass::ZERO {
         println!(
             "Warning: The mass given in {input_file_path:?} is {:?} kg, but it should be positive.
 Assuming a positive value of {:?} kg.",
@@ -129,7 +130,7 @@ Assuming a positive value of {:?} kg.",
         input_json.mass = -input_json.mass;
         passed_all_checks = false;
     }
-    if input_json.spring_constant < SpringConstant::new::<newton_per_meter>(0.0) {
+    if input_json.spring_constant < SpringConstant::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is {:?} N/m, but it should be positive.
 Assuming a positive value of {:?} N/m.",
@@ -139,7 +140,7 @@ Assuming a positive value of {:?} N/m.",
         input_json.spring_constant = -input_json.spring_constant;
         passed_all_checks = false;
     }
-    if input_json.damping < MassRate::new::<kilogram_per_second>(0.0) {
+    if input_json.damping < MassRate::ZERO {
         println!(
             "Warning: The damping given in {input_file_path:?} is {:?} N⋅s⋅m⁻¹, but it should be non-negative.
 Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
@@ -148,9 +149,9 @@ Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
         input_json.damping = -input_json.damping;
         passed_all_checks = false;
     }
-    if input_json.spring_lengths[0] < Length::new::<meter>(0.0)
-        || input_json.spring_lengths[1] < Length::new::<meter>(0.0)
-        || input_json.spring_lengths[2] < Length::new::<meter>(0.0)
+    if input_json.spring_lengths[0] < Length::ZERO
+        || input_json.spring_lengths[1] < Length::ZERO
+        || input_json.spring_lengths[2] < Length::ZERO
     {
         println!(
             "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.",
@@ -397,7 +398,7 @@ Try checking if the output/ directory exists.",
     }
 
     // Run the time steps.
-    let mut current_time = Time::new::<second>(0.0);
+    let mut current_time = Time::ZERO;
     for i in 0..=input_json.total_time_steps {
         writeln!(output_file, "\nTime step {i}, t = {current_time:?} s").unwrap_or_else(|_| {
             println!("WARNING: Failed to write to {output_file_path:?}.");
