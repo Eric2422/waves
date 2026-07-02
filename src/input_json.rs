@@ -8,7 +8,7 @@ use uom::{
     si::{
         angle::radian,
         angular_velocity::radian_per_second,
-        f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
+        f64::{Angle, AngularVelocity, Force, Length, Mass, Time},
         force, length,
         mass_rate::kilogram_per_second,
         surface_tension::newton_per_meter,
@@ -16,15 +16,7 @@ use uom::{
     },
 };
 
-
-/// Alias for [`SurfaceTension`] to more accurately describe spring constants
-/// rather than surface tension, which are dimensionally equivalent.
-type SpringConstant = SurfaceTension;
-/// Alias for [`MassRate`]
-/// because the damping coefficient and rate of mass change
-/// are dimensionally equivalent,
-/// i.e., newton-seconds per meter or kilograms per second.
-type ViscousDamping = MassRate;
+use crate::dimension;
 
 
 /// Stores the parameters given in an input JSON file.
@@ -43,10 +35,10 @@ pub struct InputJson {
     /// measured in newtons per meter (N/m).
     pub spring_lengths: [Length; 3],
     /// The mass of each individual [`Particle`] in kilograms (kg).
-    pub spring_constant: SpringConstant,
+    pub spring_constant: dimension::SpringConstant,
     /// The damping coefficient of the springs
     /// in newton-seconds per meter (N⋅s⋅m⁻¹).
-    pub damping: ViscousDamping,
+    pub damping: dimension::ViscousDamping,
     /// The amplitude of the driving force as a 3D vector
     /// measured in newtons (N).
     pub driving_amplitude: [Force; 3],

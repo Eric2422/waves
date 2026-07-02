@@ -22,15 +22,12 @@ use uom::{
 
 mod input_json;
 use crate::input_json::InputJson;
+mod dimension;
+use crate::dimension::SpringConstant;
 mod particle;
 use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
 use crate::vector3d::Vector3d;
-
-
-/// Alias for [`SurfaceTension`] to more accurately describe spring constants
-/// rather than surface tension, which are dimensionally equivalent.
-type SpringConstant = SurfaceTension;
 
 
 /// The [`str`] representation of the output directory.
