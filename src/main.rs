@@ -9,13 +9,19 @@ use uom::{
     ConstZero,
     fmt::DisplayStyle::Abbreviation,
     si::{
+        angle::radian,
+        angular_velocity::radian_per_second,
         f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
+        force::newton,
+        length::meter,
         mass::kilogram,
+        mass_rate::kilogram_per_second,
         surface_tension::newton_per_meter,
         time::second,
     },
 };
 
+mod input_json;
 mod particle;
 use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
@@ -114,38 +120,40 @@ Setting to the smallest positive value {} N/m.",
     // For values that cannot accept a negative value, flip it to be positive.
     if input_json.time_step_size < Time::ZERO {
         println!(
-            "Warning: The time step size given in {input_file_path:?} is {:?} s, but it should be positive.
-Assuming a positive value of {:?} s.",
-            input_json.time_step_size,
-            -input_json.time_step_size
+            "Warning: The time step size given in {input_file_path:?} is {} s, but it should be positive.
+Assuming a positive value of {} s.",
+            input_json.time_step_size.into_format_args(second, Abbreviation),
+            (-input_json.time_step_size).into_format_args(second, Abbreviation)
         );
         input_json.time_step_size = -input_json.time_step_size;
         passed_all_checks = false;
     }
     if input_json.mass < Mass::ZERO {
         println!(
-            "Warning: The mass given in {input_file_path:?} is {:?} kg, but it should be positive.
-Assuming a positive value of {:?} kg.",
-            input_json.mass, -input_json.mass
+            "Warning: The mass given in {input_file_path:?} is {} kg, but it should be positive.
+Assuming a positive value of {} kg.",
+            input_json.mass.into_format_args(kilogram, Abbreviation),
+            (-input_json.mass).into_format_args(kilogram, Abbreviation)
         );
         input_json.mass = -input_json.mass;
         passed_all_checks = false;
     }
     if input_json.spring_constant < SpringConstant::ZERO {
         println!(
-            "Warning: The spring constant given in {input_file_path:?} is {:?} N/m, but it should be positive.
-Assuming a positive value of {:?} N/m.",
-            input_json.spring_constant,
-            -input_json.spring_constant
+            "Warning: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive.
+Assuming a positive value of {} N/m.",
+            input_json.spring_constant.into_format_args(newton_per_meter, Abbreviation),
+            (-input_json.spring_constant).into_format_args(newton_per_meter, Abbreviation)
         );
         input_json.spring_constant = -input_json.spring_constant;
         passed_all_checks = false;
     }
     if input_json.damping < MassRate::ZERO {
         println!(
-            "Warning: The damping given in {input_file_path:?} is {:?} N⋅s⋅m⁻¹, but it should be non-negative.
-Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
-            input_json.damping, -input_json.damping
+            "Warning: The damping given in {input_file_path:?} is {} N⋅s⋅m⁻¹, but it should be non-negative.
+Assuming a positive value of {} N⋅s⋅m⁻¹.",
+            input_json.damping.into_format_args(kilogram_per_second, Abbreviation),
+            (-input_json.damping).into_format_args(kilogram_per_second, Abbreviation)
         );
         input_json.damping = -input_json.damping;
         passed_all_checks = false;
@@ -155,16 +163,20 @@ Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
         || input_json.spring_lengths[2] < Length::ZERO
     {
         println!(
-            "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.",
-            input_json.spring_lengths
+            "Warning: The springs lengths given in {input_file_path:?} are ({}, {}, {}) m, but they should be non-negative.",
+            input_json.spring_lengths[0].get::<meter>(),
+            input_json.spring_lengths[1].get::<meter>(),
+            input_json.spring_lengths[2].get::<meter>()
         );
 
         input_json.spring_lengths[0] = (input_json.spring_lengths[0]).abs();
         input_json.spring_lengths[1] = (input_json.spring_lengths[1]).abs();
         input_json.spring_lengths[2] = (input_json.spring_lengths[2]).abs();
         println!(
-            "\nAssuming positive values of {:?} m.",
-            input_json.spring_lengths
+            "\nAssuming positive values of ({}, {}, {}) m.",
+            input_json.spring_lengths[0].get::<meter>(),
+            input_json.spring_lengths[1].get::<meter>(),
+            input_json.spring_lengths[2].get::<meter>()
         );
 
         passed_all_checks = false;
@@ -368,13 +380,33 @@ fn main() {
         .open(&output_file_path)
         .unwrap_or_else(|_| {
             panic!(
-                "ERROR: Unable to create or open {:?}!
-Try checking if the output/ directory exists.",
-                "test.txt"
+                "ERROR: Unable to create or open {output_file_path:?}!
+Try checking if the output/ directory exists."
             );
         });
-    writeln!(output_file, "Input: {input_file_path:?}")
-        .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
+    writeln!(
+        output_file,
+        "Input JSON: {}
+    Spring constant: {}
+    Driving parameters:
+        Amplitude: ({}, {}, {})
+        Angular Frequency: {}
+        Phase: {}",
+        &args[1],
+        input_json
+            .spring_constant
+            .into_format_args(newton_per_meter, Abbreviation),
+        input_json.driving_amplitude[0].into_format_args(newton, Abbreviation),
+        input_json.driving_amplitude[1].into_format_args(newton, Abbreviation),
+        input_json.driving_amplitude[2].into_format_args(newton, Abbreviation),
+        input_json
+            .driving_angular_frequency
+            .into_format_args(radian_per_second, Abbreviation),
+        input_json
+            .driving_phase
+            .into_format_args(radian, Abbreviation)
+    )
+    .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
 
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
