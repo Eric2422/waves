@@ -263,7 +263,7 @@ impl ParticleBuilder {
 
 /// A spring of a given stiffness connecting two [`Particle`]s.
 #[derive(Clone, Debug)]
-struct Spring {
+pub struct Spring {
     particles: [Particle; 2],
     spring_constant: f64,
     resting_length: f64,
