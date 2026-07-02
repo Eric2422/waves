@@ -1,3 +1,5 @@
+//! Handles the information from [`serde`] deserializing the input JSON files.
+
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
@@ -13,6 +15,8 @@ use uom::{
         time::second,
     },
 };
+
+
 /// Alias for [`SurfaceTension`] to more accurately describe spring constants
 /// rather than surface tension, which are dimensionally equivalent.
 type SpringConstant = SurfaceTension;
@@ -21,6 +25,7 @@ type SpringConstant = SurfaceTension;
 /// are dimensionally equivalent,
 /// i.e., newton-seconds per meter or kilograms per second.
 type ViscousDamping = MassRate;
+
 
 /// Stores the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
