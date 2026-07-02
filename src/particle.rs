@@ -7,11 +7,6 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use uom::si::{
-    f64::{Length, Mass},
-    mass::kilogram,
-};
-
 use crate::{vector3d, vector3d::Vector3d};
 
 /// Counter for the [`id`] property of the [`Particle`] class.

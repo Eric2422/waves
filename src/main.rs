@@ -5,13 +5,15 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use uom::si::{
-    f64::{Angle, AngularVelocity, Length, Mass, MassRate, SurfaceTension, Time},
-    length::meter,
-    mass::kilogram,
-    mass_rate::kilogram_per_second,
-    surface_tension::newton_per_meter,
-    time::second,
+use uom::{
+    ConstZero,
+    fmt::DisplayStyle::Abbreviation,
+    si::{
+        f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
+        mass::kilogram,
+        surface_tension::newton_per_meter,
+        time::second,
+    },
 };
 
 mod particle;
@@ -19,20 +21,22 @@ use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
 use crate::vector3d::Vector3d;
 
+
 /// Alias for [`SurfaceTension`] to more accurately describe spring constants
 /// rather than surface tension, which are dimensionally equivalent.
 type SpringConstant = SurfaceTension;
-
 /// Alias for [`MassRate`]
 /// because the damping coefficient and rate of mass change
 /// are dimensionally equivalent,
 /// i.e., newton-seconds per meter or kilograms per second.
 type ViscousDamping = MassRate;
 
+
 /// The [`str`] representation of the output directory.
 /// A [`Path`] would be easier to work with,
 /// but [`Path`]s can not be instantiated statically.
 static OUTPUT_DIR_STRING: &str = "output";
+
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -56,7 +60,7 @@ pub struct InputJson {
     damping: ViscousDamping,
     /// The amplitude of the driving force as a 3D vector
     /// measured in newtons (N).
-    driving_amplitude: [f64; 3],
+    driving_amplitude: [Force; 3],
     /// The angular frequency of the driving force
     /// in radians per second (rad/s).
     driving_angular_frequency: AngularVelocity,
@@ -79,7 +83,7 @@ fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) -> bool 
 
     // Check for values that can not accept 0.
     // If so, set it to be the minimum positive value.
-    if input_json.time_step_size == Time::new::<second>(0.0) {
+    if input_json.time_step_size == Time::ZERO {
         println!(
             "Warning: The time step size given in {input_file_path:?} is 0.0 s, but it should be non-zero.
 Setting to the smallest positive value {} s.",
@@ -88,7 +92,7 @@ Setting to the smallest positive value {} s.",
         input_json.time_step_size = Time::new::<second>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.mass == Mass::new::<kilogram>(0.0) {
+    if input_json.mass == Mass::ZERO {
         println!(
             "Warning: The mass given in {input_file_path:?} is 0.0 kg, but it should be non-zero.
 Setting to the smallest positive value {} kg.",
@@ -97,7 +101,7 @@ Setting to the smallest positive value {} kg.",
         input_json.mass = Mass::new::<kilogram>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.spring_constant == SpringConstant::new::<newton_per_meter>(0.0) {
+    if input_json.spring_constant == SpringConstant::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is 0.0 N/m, but it should be non-zero.
 Setting to the smallest positive value {} N/m.",
@@ -108,7 +112,7 @@ Setting to the smallest positive value {} N/m.",
     }
 
     // For values that cannot accept a negative value, flip it to be positive.
-    if input_json.time_step_size < Time::new::<second>(0.0) {
+    if input_json.time_step_size < Time::ZERO {
         println!(
             "Warning: The time step size given in {input_file_path:?} is {:?} s, but it should be positive.
 Assuming a positive value of {:?} s.",
@@ -118,7 +122,7 @@ Assuming a positive value of {:?} s.",
         input_json.time_step_size = -input_json.time_step_size;
         passed_all_checks = false;
     }
-    if input_json.mass < Mass::new::<kilogram>(0.0) {
+    if input_json.mass < Mass::ZERO {
         println!(
             "Warning: The mass given in {input_file_path:?} is {:?} kg, but it should be positive.
 Assuming a positive value of {:?} kg.",
@@ -127,7 +131,7 @@ Assuming a positive value of {:?} kg.",
         input_json.mass = -input_json.mass;
         passed_all_checks = false;
     }
-    if input_json.spring_constant < SpringConstant::new::<newton_per_meter>(0.0) {
+    if input_json.spring_constant < SpringConstant::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is {:?} N/m, but it should be positive.
 Assuming a positive value of {:?} N/m.",
@@ -137,7 +141,7 @@ Assuming a positive value of {:?} N/m.",
         input_json.spring_constant = -input_json.spring_constant;
         passed_all_checks = false;
     }
-    if input_json.damping < MassRate::new::<kilogram_per_second>(0.0) {
+    if input_json.damping < MassRate::ZERO {
         println!(
             "Warning: The damping given in {input_file_path:?} is {:?} N⋅s⋅m⁻¹, but it should be non-negative.
 Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
@@ -146,9 +150,9 @@ Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
         input_json.damping = -input_json.damping;
         passed_all_checks = false;
     }
-    if input_json.spring_lengths[0] < Length::new::<meter>(0.0)
-        || input_json.spring_lengths[1] < Length::new::<meter>(0.0)
-        || input_json.spring_lengths[2] < Length::new::<meter>(0.0)
+    if input_json.spring_lengths[0] < Length::ZERO
+        || input_json.spring_lengths[1] < Length::ZERO
+        || input_json.spring_lengths[2] < Length::ZERO
     {
         println!(
             "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.",
@@ -213,11 +217,11 @@ fn calculate_spring_force(
 
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
-                if x != center_x && y != center_y && z != center_z {
+                if particles[x][y][z] != *center_particle {
                     // Get the current, stretched vector between the particles.
                     let distance_vector = center_particle.position - particles[x][y][z].position;
-                    // Calculate the original resting distance.
-                    let rest_distance = vector3d!(
+                    // Calculate the resting length.
+                    let resting_length = vector3d!(
                         (x as f64 - center_x as f64) * spring_lengths[0].value,
                         (y as f64 - center_y as f64) * spring_lengths[1].value,
                         (z as f64 - center_z as f64) * spring_lengths[2].value
@@ -226,7 +230,7 @@ fn calculate_spring_force(
 
                     // Apply Hooke's Law.
                     spring_force += -spring_constant.value
-                        * (distance_vector.get_magnitude() - rest_distance)
+                        * (distance_vector.get_magnitude() - resting_length)
                         * distance_vector.get_normalized();
                 }
             }
@@ -252,13 +256,14 @@ fn update_particles(
     current_time: Time,
     mut output_file: Option<&mut fs::File>,
 ) {
-    let angle = input_json.driving_angular_frequency * current_time;
-
     // Calculate the current force given by a sinusoidal driving force.
-    let driving_force = vector3d!(input_json.driving_amplitude)
-        * ((input_json.driving_angular_frequency * current_time).value
-            + input_json.driving_phase.value)
-            .cos();
+    let driving_force = vector3d!(
+        input_json.driving_amplitude[0].value,
+        input_json.driving_amplitude[1].value,
+        input_json.driving_amplitude[2].value
+    ) * ((input_json.driving_angular_frequency * current_time).value
+        + input_json.driving_phase.value)
+        .cos();
 
     // Apply forces to all particles.
     for x in 0..particles.len() {
@@ -394,9 +399,14 @@ Try checking if the output/ directory exists.",
     }
 
     // Run the time steps.
-    let mut current_time = Time::new::<second>(0.0);
+    let mut current_time = Time::ZERO;
     for i in 0..=input_json.total_time_steps {
-        writeln!(output_file, "\nTime step {i}, t = {current_time:?} s").unwrap_or_else(|_| {
+        writeln!(
+            output_file,
+            "\nTime step {i}, t = {}",
+            current_time.into_format_args(second, Abbreviation)
+        )
+        .unwrap_or_else(|_| {
             println!("WARNING: Failed to write to {output_file_path:?}.");
         });
 
