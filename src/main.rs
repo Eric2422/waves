@@ -7,6 +7,10 @@ use std::{
 use serde::{Deserialize, Serialize};
 use uom::{
     ConstZero,
+<<<<<<< HEAD
+=======
+    fmt::DisplayStyle::Abbreviation,
+>>>>>>> main
     si::{
         f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
         mass::kilogram,
@@ -20,20 +24,22 @@ use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
 use crate::vector3d::Vector3d;
 
+
 /// Alias for [`SurfaceTension`] to more accurately describe spring constants
 /// rather than surface tension, which are dimensionally equivalent.
 type SpringConstant = SurfaceTension;
-
 /// Alias for [`MassRate`]
 /// because the damping coefficient and rate of mass change
 /// are dimensionally equivalent,
 /// i.e., newton-seconds per meter or kilograms per second.
 type ViscousDamping = MassRate;
 
+
 /// The [`str`] representation of the output directory.
 /// A [`Path`] would be easier to work with,
 /// but [`Path`]s can not be instantiated statically.
 static OUTPUT_DIR_STRING: &str = "output";
+
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -214,11 +220,11 @@ fn calculate_spring_force(
 
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
-                if x != center_x && y != center_y && z != center_z {
+                if particles[x][y][z] != *center_particle {
                     // Get the current, stretched vector between the particles.
                     let distance_vector = center_particle.position - particles[x][y][z].position;
-                    // Calculate the original resting distance.
-                    let rest_distance = vector3d!(
+                    // Calculate the resting length.
+                    let resting_length = vector3d!(
                         (x as f64 - center_x as f64) * spring_lengths[0],
                         (y as f64 - center_y as f64) * spring_lengths[1],
                         (z as f64 - center_z as f64) * spring_lengths[2]
@@ -234,7 +240,7 @@ fn calculate_spring_force(
         }
     }
 
-    total_force
+    spring_force
 }
 
 /// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
@@ -254,8 +260,18 @@ fn update_particles(
     mut output_file: Option<&mut fs::File>,
 ) {
     // Calculate the current force given by a sinusoidal driving force.
+<<<<<<< HEAD
     let driving_force = vector3d!(input_json.driving_amplitude)
         * ((input_json.driving_angular_frequency * current_time) + input_json.driving_phase).cos();
+=======
+    let driving_force = vector3d!(
+        input_json.driving_amplitude[0].value,
+        input_json.driving_amplitude[1].value,
+        input_json.driving_amplitude[2].value
+    ) * ((input_json.driving_angular_frequency * current_time).value
+        + input_json.driving_phase.value)
+        .cos();
+>>>>>>> main
 
     // Apply forces to all particles.
     for x in 0..particles.len() {
@@ -284,7 +300,7 @@ fn update_particles(
                     total_force += driving_force;
                 }
 
-                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
+                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass;
             }
         }
     }
@@ -378,7 +394,7 @@ Try checking if the output/ directory exists.",
 
             for z in 0..input_json.dimensions[2] {
                 particles[x][y].push(
-                    ParticleBuilder::new(input_json.mass)
+                    ParticleBuilder::new(input_json.mass.value)
                         .set_position(
                             (x as f64) * input_json.spring_lengths[0],
                             (y as f64) * input_json.spring_lengths[1],
@@ -393,7 +409,12 @@ Try checking if the output/ directory exists.",
     // Run the time steps.
     let mut current_time = Time::ZERO;
     for i in 0..=input_json.total_time_steps {
-        writeln!(output_file, "\nTime step {i}, t = {current_time:?} s").unwrap_or_else(|_| {
+        writeln!(
+            output_file,
+            "\nTime step {i}, t = {}",
+            current_time.into_format_args(second, Abbreviation)
+        )
+        .unwrap_or_else(|_| {
             println!("WARNING: Failed to write to {output_file_path:?}.");
         });
 
