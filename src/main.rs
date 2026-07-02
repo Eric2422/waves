@@ -6,7 +6,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use uom::si::{
-    f64::{Angle, AngularVelocity, Length, Mass, MassRate, SurfaceTension, Time},
+    f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
     length::meter,
     mass::kilogram,
     mass_rate::kilogram_per_second,
@@ -19,20 +19,22 @@ use crate::particle::{Particle, ParticleBuilder};
 mod vector3d;
 use crate::vector3d::Vector3d;
 
+
 /// Alias for [`SurfaceTension`] to more accurately describe spring constants
 /// rather than surface tension, which are dimensionally equivalent.
 type SpringConstant = SurfaceTension;
-
 /// Alias for [`MassRate`]
 /// because the damping coefficient and rate of mass change
 /// are dimensionally equivalent,
 /// i.e., newton-seconds per meter or kilograms per second.
 type ViscousDamping = MassRate;
 
+
 /// The [`str`] representation of the output directory.
 /// A [`Path`] would be easier to work with,
 /// but [`Path`]s can not be instantiated statically.
 static OUTPUT_DIR_STRING: &str = "output";
+
 
 /// Store the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -56,7 +58,7 @@ pub struct InputJson {
     damping: ViscousDamping,
     /// The amplitude of the driving force as a 3D vector
     /// measured in newtons (N).
-    driving_amplitude: [f64; 3],
+    driving_amplitude: [Force; 3],
     /// The angular frequency of the driving force
     /// in radians per second (rad/s).
     driving_angular_frequency: AngularVelocity,
@@ -252,13 +254,14 @@ fn update_particles(
     current_time: Time,
     mut output_file: Option<&mut fs::File>,
 ) {
-    let angle = input_json.driving_angular_frequency * current_time;
-
     // Calculate the current force given by a sinusoidal driving force.
-    let driving_force = vector3d!(input_json.driving_amplitude)
-        * ((input_json.driving_angular_frequency * current_time).value
-            + input_json.driving_phase.value)
-            .cos();
+    let driving_force = vector3d!(
+        input_json.driving_amplitude[0].value,
+        input_json.driving_amplitude[1].value,
+        input_json.driving_amplitude[2].value
+    ) * ((input_json.driving_angular_frequency * current_time).value
+        + input_json.driving_phase.value)
+        .cos();
 
     // Apply forces to all particles.
     for x in 0..particles.len() {
