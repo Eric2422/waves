@@ -216,7 +216,7 @@ fn calculate_spring_force(
 
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
-                if !(x == center_x && y == center_y && z == center_z) {
+                if particles[x][y][z] != *center_particle {
                     // Get the current, stretched vector between the particles.
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the resting length.
@@ -235,8 +235,6 @@ fn calculate_spring_force(
             }
         }
     }
-
-    // println!("Spring force: {spring_force}");
 
     spring_force
 }
