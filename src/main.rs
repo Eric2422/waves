@@ -400,7 +400,7 @@ Try checking if the output/ directory exists.",
     // Run the time steps.
     let mut current_time = Time::ZERO;
     for i in 0..=input_json.total_time_steps {
-        writeln!(output_file, "\nTime step {i}, t = {current_time:?} s").unwrap_or_else(|_| {
+        writeln!(output_file, "\nTime step {i}, t = {current_time:?}").unwrap_or_else(|_| {
             println!("WARNING: Failed to write to {output_file_path:?}.");
         });
 
