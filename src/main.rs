@@ -8,10 +8,7 @@ use uom::{
     ConstZero,
     fmt::DisplayStyle::Abbreviation,
     si::{
-        angle::radian,
-        angular_velocity::radian_per_second,
-        f64::{Length, Mass, MassRate, SurfaceTension, Time},
-        force::newton,
+        f64::{Length, Mass, MassRate, Time},
         length::meter,
         mass::kilogram,
         mass_rate::kilogram_per_second,
@@ -265,7 +262,7 @@ fn update_particles(
                     total_force += driving_force;
                 }
 
-                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass;
+                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
             }
         }
     }
@@ -364,7 +361,7 @@ Input JSON: {}
 
             for z in 0..input_json.dimensions[2] {
                 particles[x][y].push(
-                    ParticleBuilder::new(input_json.mass.value)
+                    ParticleBuilder::new(input_json.mass)
                         .set_position(
                             (x as f64) * input_json.spring_lengths[0].value,
                             (y as f64) * input_json.spring_lengths[1].value,

@@ -7,7 +7,11 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use uom::si::length::meter;
+use uom::{
+    ConstZero,
+    fmt::DisplayStyle::Abbreviation,
+    si::{f64::Mass, length::meter, mass::kilogram},
+};
 
 use crate::{dimension, vector3d, vector3d::Vector3d};
 
@@ -21,7 +25,7 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 pub struct Particle {
     id: usize,
     /// The mass of this particle in kilograms (kg).
-    pub mass: f64,
+    pub mass: Mass,
     /// The position of this particle as a 3D vector in meters (m).
     pub position: Vector3d,
     /// The velocity of this particle as a 3D vector in meters per second (m/s).
@@ -67,8 +71,12 @@ impl Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Particle {}: m = {:?} kg, r = {} m, v = {} m/s, a = {} m/s²",
-            self.id, self.mass, self.position, self.velocity, self.acceleration
+            "Particle {}: m = {}, r = {} m, v = {} m/s, a = {} m/s²",
+            self.id,
+            self.mass.into_format_args(kilogram, Abbreviation),
+            self.position,
+            self.velocity,
+            self.acceleration
         )
     }
 }
@@ -114,7 +122,7 @@ impl Particle {
 /// [`id`]: Particle::id
 #[derive(Default)]
 pub struct ParticleBuilder {
-    mass: f64,
+    mass: Mass,
     position: Vector3d,
     velocity: Vector3d,
     attached_springs: HashSet<Spring>,
@@ -125,13 +133,13 @@ impl ParticleBuilder {
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
     /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
     pub fn new_1kg() -> ParticleBuilder {
-        ParticleBuilder::new(1.0)
+        ParticleBuilder::new(Mass::new::<kilogram>(1.0))
     }
 
     /// Instantiate and return a new [`ParticleBuilder`] with a given mass,
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
     /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
-    pub fn new(mass: f64) -> ParticleBuilder {
+    pub fn new(mass: Mass) -> ParticleBuilder {
         ParticleBuilder {
             mass,
             position: Vector3d::zero(),
@@ -157,8 +165,8 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`mass`]: Particle::mass
-    pub fn set_mass(mut self, mass: f64) -> ParticleBuilder {
-        if mass > 0.0 {
+    pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder {
+        if mass > Mass::ZERO {
             self.mass = mass;
         };
         self
