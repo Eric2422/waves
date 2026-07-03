@@ -13,14 +13,10 @@ use uom::{
 
 /// A 3D vector with x, y, and z values.
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
-pub struct Vector3d<D: Dimension>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    pub x: Quantity<D, SI<f64>, f64>,
-    pub y: Quantity<D, SI<f64>, f64>,
-    pub z: Quantity<D, SI<f64>, f64>,
+pub struct Vector3d<Q> {
+    pub x: Q,
+    pub y: Q,
+    pub z: Q,
 }
 
 /// Either converts a three-element [`f64`] array into a [3D vector]
@@ -46,12 +42,8 @@ macro_rules! vector3d {
     };
 }
 
-impl<D> Add for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Vector3d<D>;
+impl<Q: std::ops::Add<Output = Q>> Add for Vector3d<Q> {
+    type Output = Vector3d<Q>;
 
     /// Adds two [3D vector]s together, returning the [vector] sum.
     /// *Neither* of the original [vector]s are modified.
@@ -82,11 +74,7 @@ where
     }
 }
 
-impl<D> AddAssign for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
+impl<Q: std::ops::AddAssign> AddAssign for Vector3d<Q> {
     /// Adds another [3D vector] to this [vector].
     ///
     /// [3D vector]: Vector3d
@@ -98,12 +86,8 @@ where
     }
 }
 
-impl<D> Neg for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Vector3d<D>;
+impl<Q: std::ops::Neg<Output = Q>> Neg for Vector3d<Q> {
+    type Output = Vector3d<Q>;
 
     /// Returns the negative of this [3D vector].
     ///
@@ -117,12 +101,8 @@ where
     }
 }
 
-impl<D> Sub for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Vector3d<D>;
+impl<Q: std::ops::Sub<Output = Q>> Sub for Vector3d<Q> {
+    type Output = Vector3d<Q>;
 
     /// Returns the difference between this [3D vector] and another [3D vector].
     /// *Neither* of the original [vector]s are modified.
@@ -138,11 +118,7 @@ where
     }
 }
 
-impl<D> SubAssign for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
+impl<Q: std::ops::SubAssign> SubAssign for Vector3d<Q> {
     /// Subtract another [3D vector] from this [vector].
     ///
     /// [3D vector]: Vector3d
@@ -154,12 +130,8 @@ where
     }
 }
 
-impl<D> Mul<f64> for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Vector3d<D>;
+impl<Q: std::ops::Mul<f64, Output = Q>> Mul<f64> for Vector3d<Q> {
+    type Output = Vector3d<Q>;
 
     /// Returns the product between this [3D vector] and a scalar.
     ///
@@ -181,30 +153,22 @@ where
     }
 }
 
-impl<D> Mul<Vector3d<D>> for Quantity<D, uom::si::SI<f64>, f64>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Vector3d<D>;
+impl<Q> Mul<Vector3d<Q>> for Q {
+    type Output = Vector3d<Q>;
 
     /// Returns the product between this scalar and a [3D vector].
     ///
     /// [3D vector]: Vector3d
-    fn mul(self, rhs: Vector3d<D>) -> Self::Output {
+    fn mul(self, rhs: Vector3d<Q>) -> Self::Output {
         Vector3d {
-            x: self * rhs.x.value,
-            y: self * rhs.y.value,
-            z: self * rhs.z.value,
+            x: self * rhs.x,
+            y: self * rhs.y,
+            z: self * rhs.z,
         }
     }
 }
 
-impl<D> MulAssign<f64> for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
+impl<Q: std::ops::MulAssign<f64>> MulAssign<f64> for Vector3d<Q> {
     /// Multiply this [`Vector3d`] by a scalar, *mutating it in the process*.
     fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
@@ -213,12 +177,8 @@ where
     }
 }
 
-impl<D> Div<f64> for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
-    type Output = Vector3d<D>;
+impl<Q: std::ops::Div<f64, Output = Q>> Div<f64> for Vector3d<Q> {
+    type Output = Vector3d<Q>;
 
     /// Return the result of this [3D vector] divided by a scalar, without
     /// mutating the [3D vector].
@@ -246,11 +206,7 @@ where
     }
 }
 
-impl<D> DivAssign<f64> for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
+impl<Q: std::ops::DivAssign<f64>> DivAssign<f64> for Vector3d<Q> {
     /// Divide this [3D vector] by a scalar, *mutating it in the process*.
     ///
     /// [3D vector]: Vector3d
@@ -261,24 +217,20 @@ where
     }
 }
 
-impl<D> Display for Vector3d<D>
-where
-    D: Dimension,
-    <D as Dimension>::Kind: uom::Kind,
-{
+impl<Q: std::fmt::Debug> Display for Vector3d<Q> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({:?}, {:?}, {:?})", self.x, self.y, self.z)
     }
 }
 
-impl<D> Vector3d<D>
+impl<Q> Vector3d<Q>
 where
-    D: Dimension + Sized + uom::ConstZero,
+    Q: Dimension + Sized + uom::ConstZero,
     <D as Dimension>::Kind: uom::Kind,
     <D as Dimension>::Kind: Sized,
 {
     /// Return the zero vector, i.e., `Vector3d {x: 0.0, y: 0.0, z: 0.0}`.
-    pub fn zero() -> Vector3d<D> {
+    pub fn zero() -> Vector3d<Q> {
         Vector3d {
             // The default value should 0.0, but is highly fragile.
             // TODO: Replace with something more stable.
@@ -308,7 +260,7 @@ where
     /// Return the normalized unit vector of this [3D vector].
     ///
     /// [3D vector]: Vector3d
-    pub fn get_normalized(&self) -> Vector3d<D> {
+    pub fn get_normalized(&self) -> Vector3d<Q> {
         *self / self.get_magnitude()
     }
 }
