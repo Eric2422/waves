@@ -1,72 +1,39 @@
+mod dimension;
+mod input_json;
+mod particle;
+mod vector3d;
+
 use std::{
     cmp, env, fs,
     io::Write,
     path::{Path, PathBuf},
 };
 
-use serde::{Deserialize, Serialize};
 use uom::{
     ConstZero,
     fmt::DisplayStyle::Abbreviation,
     si::{
-        f64::{Angle, AngularVelocity, Force, Length, Mass, MassRate, SurfaceTension, Time},
+        f64::{Length, Mass, MassRate, Time},
+        length::meter,
         mass::kilogram,
+        mass_rate::kilogram_per_second,
         surface_tension::newton_per_meter,
         time::second,
     },
 };
 
-mod particle;
-use crate::particle::{Particle, ParticleBuilder};
-mod vector3d;
-use crate::vector3d::Vector3d;
-
-
-/// Alias for [`SurfaceTension`] to more accurately describe spring constants
-/// rather than surface tension, which are dimensionally equivalent.
-type SpringConstant = SurfaceTension;
-/// Alias for [`MassRate`]
-/// because the damping coefficient and rate of mass change
-/// are dimensionally equivalent,
-/// i.e., newton-seconds per meter or kilograms per second.
-type ViscousDamping = MassRate;
+use crate::{
+    dimension::SpringConstant,
+    input_json::InputJson,
+    particle::{Particle, ParticleBuilder},
+    vector3d::Vector3d,
+};
 
 
 /// The [`str`] representation of the output directory.
 /// A [`Path`] would be easier to work with,
 /// but [`Path`]s can not be instantiated statically.
 static OUTPUT_DIR_STRING: &str = "output";
-
-
-/// Store the parameters given in an input JSON file.
-#[derive(Serialize, Deserialize)]
-pub struct InputJson {
-    /// Size of each time step in seconds (s).
-    time_step_size: Time,
-    /// The total number of time steps to run.
-    total_time_steps: u32,
-    /// The number of [`Particle`]s in each direction: x, y, and z.
-    dimensions: [usize; 3],
-    /// The distance between [`Particle`]s in each direction.
-    /// Measured in meters (m).
-    spring_lengths: [Length; 3],
-    /// The mass of each individual [`Particle`] in kilograms (kg).
-    mass: Mass,
-    /// The spring constant between each pair of particles,
-    /// measured in newtons per meter (N/m).
-    spring_constant: SpringConstant,
-    /// The damping coefficient of the springs
-    /// in newton-seconds per meter (N⋅s⋅m⁻¹).
-    damping: ViscousDamping,
-    /// The amplitude of the driving force as a 3D vector
-    /// measured in newtons (N).
-    driving_amplitude: [Force; 3],
-    /// The angular frequency of the driving force
-    /// in radians per second (rad/s).
-    driving_angular_frequency: AngularVelocity,
-    /// The phase shift of the driving force, which is a dimensionless value.
-    driving_phase: Angle,
-}
 
 /// Checks for various illogical input JSON settings.
 /// Corrects time step size, mass, and spring constant to [`f64::MIN_POSITIVE`]
@@ -114,40 +81,22 @@ Setting to the smallest positive value {} N/m.",
     // For values that cannot accept a negative value, flip it to be positive.
     if input_json.time_step_size < Time::ZERO {
         println!(
-            "Warning: The time step size given in {input_file_path:?} is {:?} s, but it should be positive.
-Assuming a positive value of {:?} s.",
-            input_json.time_step_size,
-            -input_json.time_step_size
+            "Warning: The time step size given in {input_file_path:?} is {} s, but it should be positive.
+Assuming a positive value of {} s.",
+            input_json.time_step_size.into_format_args(second, Abbreviation),
+            (-input_json.time_step_size).into_format_args(second, Abbreviation)
         );
         input_json.time_step_size = -input_json.time_step_size;
         passed_all_checks = false;
     }
     if input_json.mass < Mass::ZERO {
         println!(
-            "Warning: The mass given in {input_file_path:?} is {:?} kg, but it should be positive.
-Assuming a positive value of {:?} kg.",
-            input_json.mass, -input_json.mass
+            "Warning: The mass given in {input_file_path:?} is {} kg, but it should be positive.
+Assuming a positive value of {} kg.",
+            input_json.mass.into_format_args(kilogram, Abbreviation),
+            (-input_json.mass).into_format_args(kilogram, Abbreviation)
         );
         input_json.mass = -input_json.mass;
-        passed_all_checks = false;
-    }
-    if input_json.spring_constant < SpringConstant::ZERO {
-        println!(
-            "Warning: The spring constant given in {input_file_path:?} is {:?} N/m, but it should be positive.
-Assuming a positive value of {:?} N/m.",
-            input_json.spring_constant,
-            -input_json.spring_constant
-        );
-        input_json.spring_constant = -input_json.spring_constant;
-        passed_all_checks = false;
-    }
-    if input_json.damping < MassRate::ZERO {
-        println!(
-            "Warning: The damping given in {input_file_path:?} is {:?} N⋅s⋅m⁻¹, but it should be non-negative.
-Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
-            input_json.damping, -input_json.damping
-        );
-        input_json.damping = -input_json.damping;
         passed_all_checks = false;
     }
     if input_json.spring_lengths[0] < Length::ZERO
@@ -155,18 +104,42 @@ Assuming a positive value of {:?} N⋅s⋅m⁻¹.",
         || input_json.spring_lengths[2] < Length::ZERO
     {
         println!(
-            "Warning: The springs lengths given in {input_file_path:?} are {:?} m, but they should be non-negative.",
-            input_json.spring_lengths
+            "Warning: The springs lengths given in {input_file_path:?} are ({}, {}, {}) m, but they should be non-negative.",
+            input_json.spring_lengths[0].get::<meter>(),
+            input_json.spring_lengths[1].get::<meter>(),
+            input_json.spring_lengths[2].get::<meter>()
         );
 
         input_json.spring_lengths[0] = (input_json.spring_lengths[0]).abs();
         input_json.spring_lengths[1] = (input_json.spring_lengths[1]).abs();
         input_json.spring_lengths[2] = (input_json.spring_lengths[2]).abs();
         println!(
-            "\nAssuming positive values of {:?} m.",
-            input_json.spring_lengths
+            "\nAssuming positive values of ({}, {}, {}) m.",
+            input_json.spring_lengths[0].get::<meter>(),
+            input_json.spring_lengths[1].get::<meter>(),
+            input_json.spring_lengths[2].get::<meter>()
         );
 
+        passed_all_checks = false;
+    }
+    if input_json.spring_constant < SpringConstant::ZERO {
+        println!(
+            "Warning: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive.
+Assuming a positive value of {} N/m.",
+            input_json.spring_constant.into_format_args(newton_per_meter, Abbreviation),
+            (-input_json.spring_constant).into_format_args(newton_per_meter, Abbreviation)
+        );
+        input_json.spring_constant = -input_json.spring_constant;
+        passed_all_checks = false;
+    }
+    if input_json.damping < MassRate::ZERO {
+        println!(
+            "Warning: The damping given in {input_file_path:?} is {} N⋅s⋅m⁻¹, but it should be non-negative.
+Assuming a positive value of {} N⋅s⋅m⁻¹.",
+            input_json.damping.into_format_args(kilogram_per_second, Abbreviation),
+            (-input_json.damping).into_format_args(kilogram_per_second, Abbreviation)
+        );
+        input_json.damping = -input_json.damping;
         passed_all_checks = false;
     }
 
@@ -292,7 +265,7 @@ fn update_particles(
                     total_force += driving_force;
                 }
 
-                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass;
+                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
             }
         }
     }
@@ -368,13 +341,18 @@ fn main() {
         .open(&output_file_path)
         .unwrap_or_else(|_| {
             panic!(
-                "ERROR: Unable to create or open {:?}!
-Try checking if the output/ directory exists.",
-                "test.txt"
+                "ERROR: Unable to create or open {output_file_path:?}!
+Try checking if the output/ directory exists."
             );
         });
-    writeln!(output_file, "Input: {input_file_path:?}")
-        .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
+    writeln!(
+        output_file,
+        "\
+Input JSON: {}
+{}",
+        &args[1], input_json
+    )
+    .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
 
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
@@ -386,7 +364,7 @@ Try checking if the output/ directory exists.",
 
             for z in 0..input_json.dimensions[2] {
                 particles[x][y].push(
-                    ParticleBuilder::new(input_json.mass.value)
+                    ParticleBuilder::new(input_json.mass)
                         .set_position(
                             (x as f64) * input_json.spring_lengths[0].value,
                             (y as f64) * input_json.spring_lengths[1].value,
