@@ -1,3 +1,8 @@
+mod dimension;
+mod input_json;
+mod particle;
+mod vector3d;
+
 use std::{
     cmp, env, fs,
     io::Write,
@@ -17,14 +22,12 @@ use uom::{
     },
 };
 
-mod input_json;
-use crate::input_json::InputJson;
-mod dimension;
-use crate::dimension::SpringConstant;
-mod particle;
-use crate::particle::{Particle, ParticleBuilder};
-mod vector3d;
-use crate::vector3d::Vector3d;
+use crate::{
+    dimension::SpringConstant,
+    input_json::InputJson,
+    particle::{Particle, ParticleBuilder},
+    vector3d::Vector3d,
+};
 
 
 /// The [`str`] representation of the output directory.
