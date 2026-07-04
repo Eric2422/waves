@@ -23,7 +23,16 @@ use crate::particle::{Particle, Spring};
 
 /// Stores the driving parameters as part of [`InputJson`].
 #[derive(Serialize, Deserialize)]
-pub struct DrivingParameters {}
+pub struct DrivingParameters {
+    /// The amplitude of the driving force as a 3D vector
+    /// measured in newtons (N).
+    pub amplitude: [Force; 3],
+    /// The angular frequency of the driving force
+    /// in radians per second (rad/s).
+    pub angular_frequency: AngularVelocity,
+    /// The phase of the driving force in radians (rad).
+    pub phase: Angle,
+}
 
 /// Stores the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -57,14 +66,7 @@ pub struct InputJson {
     ///
     /// [`Spring`]: crate::particle::Spring
     pub damping: dimension::ViscousDamping,
-    /// The amplitude of the driving force as a 3D vector
-    /// measured in newtons (N).
-    pub driving_amplitude: [Force; 3],
-    /// The angular frequency of the driving force
-    /// in radians per second (rad/s).
-    pub driving_angular_frequency: AngularVelocity,
-    /// The phase of the driving force in radians (rad).
-    pub driving_phase: Angle,
+    pub driving: DrivingParameters,
 }
 
 impl Display for InputJson {
@@ -93,13 +95,14 @@ Driving parameters:
                 .into_format_args(newton_per_meter, Abbreviation),
             self.damping
                 .into_format_args(kilogram_per_second, Abbreviation),
-            self.driving_amplitude[0].get::<force::newton>(),
-            self.driving_amplitude[1].get::<force::newton>(),
-            self.driving_amplitude[2].get::<force::newton>(),
+            self.driving.amplitude[0].get::<force::newton>(),
+            self.driving.amplitude[1].get::<force::newton>(),
+            self.driving.amplitude[2].get::<force::newton>(),
             force::Units::newton.abbreviation(),
-            self.driving_angular_frequency
+            self.driving
+                .angular_frequency
                 .into_format_args(radian_per_second, Abbreviation),
-            self.driving_phase.into_format_args(radian, Abbreviation)
+            self.driving.phase.into_format_args(radian, Abbreviation)
         )
     }
 }

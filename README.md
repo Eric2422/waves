@@ -39,9 +39,11 @@ The driving phase is in radians (rad).
     "spring_lengths": [1.0, 1.0, 1.0],
     "spring_constant": 1.0,
     "damping": 1.0,
-    "driving_amplitude": [1.0, 0.0, 0.0],
-    "driving_angular_frequency": 1.0,
-    "driving_phase": 0.0
+    "driving": {
+        "amplitude": [1.0, 0.0, 0.0],
+        "angular_frequency": 1.0,
+        "phase": 0.0
+    }
 }
 ```
 
