@@ -45,16 +45,16 @@ pub struct InputJson {
     ///
     /// [`Particle`]: crate::particle::Particle
     pub dimensions: [usize; 3],
+    /// The distance between [`Particle`]s in each direction.
+    /// Measured in meters (m).
+    ///
+    /// [`Particle`]: crate::particle::Particle
+    pub particle_distances: [Length; 3],
     ///
     /// The mass of each individual [`Particle`] in kilograms (kg).
     ///
     /// [`Particle`]: crate::particle::Particle
     pub mass: Mass,
-    /// The distance between [`Particle`]s in each direction.
-    /// Measured in meters (m).
-    ///
-    /// [`Particle`]: crate::particle::Particle
-    pub spring_lengths: [Length; 3],
     /// The spring constant between each pair of [`Particle`]s,
     /// measured in newtons per meter (N/m).
     ///
@@ -76,8 +76,8 @@ impl Display for InputJson {
             "\
 Total time steps: {}
 Time step size: {}
+Particle distances: ({}, {}, {}) {}
 Dimensions: {:?}
-Spring lengths: ({}, {}, {}) {}
 Spring constant: {}
 Damping: {}
 Driving parameters:
@@ -86,11 +86,11 @@ Driving parameters:
     Phase: {}",
             self.total_time_steps,
             self.time_step_size.into_format_args(second, Abbreviation),
-            self.dimensions,
-            self.spring_lengths[0].get::<length::meter>(),
-            self.spring_lengths[1].get::<length::meter>(),
-            self.spring_lengths[1].get::<length::meter>(),
+            self.particle_distances[0].get::<length::meter>(),
+            self.particle_distances[1].get::<length::meter>(),
+            self.particle_distances[1].get::<length::meter>(),
             length::Units::meter.abbreviation(),
+            self.dimensions,
             self.spring_constant
                 .into_format_args(newton_per_meter, Abbreviation),
             self.damping

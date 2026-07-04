@@ -99,25 +99,25 @@ Assuming a positive value of {} kg.",
         input_json.mass = -input_json.mass;
         passed_all_checks = false;
     }
-    if input_json.spring_lengths[0] < Length::ZERO
-        || input_json.spring_lengths[1] < Length::ZERO
-        || input_json.spring_lengths[2] < Length::ZERO
+    if input_json.particle_distances[0] < Length::ZERO
+        || input_json.particle_distances[1] < Length::ZERO
+        || input_json.particle_distances[2] < Length::ZERO
     {
         println!(
             "Warning: The springs lengths given in {input_file_path:?} are ({}, {}, {}) m, but they should be non-negative.",
-            input_json.spring_lengths[0].get::<meter>(),
-            input_json.spring_lengths[1].get::<meter>(),
-            input_json.spring_lengths[2].get::<meter>()
+            input_json.particle_distances[0].get::<meter>(),
+            input_json.particle_distances[1].get::<meter>(),
+            input_json.particle_distances[2].get::<meter>()
         );
 
-        input_json.spring_lengths[0] = (input_json.spring_lengths[0]).abs();
-        input_json.spring_lengths[1] = (input_json.spring_lengths[1]).abs();
-        input_json.spring_lengths[2] = (input_json.spring_lengths[2]).abs();
+        input_json.particle_distances[0] = (input_json.particle_distances[0]).abs();
+        input_json.particle_distances[1] = (input_json.particle_distances[1]).abs();
+        input_json.particle_distances[2] = (input_json.particle_distances[2]).abs();
         println!(
             "\nAssuming positive values of ({}, {}, {}) m.",
-            input_json.spring_lengths[0].get::<meter>(),
-            input_json.spring_lengths[1].get::<meter>(),
-            input_json.spring_lengths[2].get::<meter>()
+            input_json.particle_distances[0].get::<meter>(),
+            input_json.particle_distances[1].get::<meter>(),
+            input_json.particle_distances[2].get::<meter>()
         );
 
         passed_all_checks = false;
@@ -254,7 +254,7 @@ fn update_particles(
                 let mut total_force = calculate_spring_force(
                     particles,
                     [x, y, z],
-                    input_json.spring_lengths,
+                    input_json.particle_distances,
                     input_json.spring_constant,
                 );
 
@@ -366,9 +366,9 @@ Input JSON: {}
                 particles[x][y].push(
                     ParticleBuilder::new(input_json.mass)
                         .set_position(
-                            (x as f64) * input_json.spring_lengths[0].value,
-                            (y as f64) * input_json.spring_lengths[1].value,
-                            (z as f64) * input_json.spring_lengths[2].value,
+                            (x as f64) * input_json.particle_distances[0].value,
+                            (y as f64) * input_json.particle_distances[1].value,
+                            (z as f64) * input_json.particle_distances[2].value,
                         )
                         .build(),
                 );
