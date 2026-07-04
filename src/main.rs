@@ -231,11 +231,11 @@ fn update_particles(
 ) {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
-        input_json.driving_amplitude[0].value,
-        input_json.driving_amplitude[1].value,
-        input_json.driving_amplitude[2].value
-    ) * ((input_json.driving_angular_frequency * current_time).value
-        + input_json.driving_phase.value)
+        input_json.driving.amplitude[0].value,
+        input_json.driving.amplitude[1].value,
+        input_json.driving.amplitude[2].value
+    ) * ((input_json.driving.angular_frequency * current_time).value
+        + input_json.driving.phase.value)
         .cos();
 
     // Apply forces to all particles.
