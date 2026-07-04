@@ -17,7 +17,13 @@ use uom::{
 };
 
 use crate::dimension;
+#[cfg(doc)]
+use crate::particle::{Particle, Spring};
 
+
+/// Stores the driving parameters as part of [`InputJson`].
+#[derive(Serialize, Deserialize)]
+pub struct DrivingParameters {}
 
 /// Stores the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
@@ -27,17 +33,29 @@ pub struct InputJson {
     /// Size of each time step in seconds (s).
     pub time_step_size: Time,
     /// The number of [`Particle`]s in each direction: x, y, and z.
+    ///
+    /// [`Particle`]: crate::particle::Particle
     pub dimensions: [usize; 3],
+    ///
+    /// The mass of each individual [`Particle`] in kilograms (kg).
+    ///
+    /// [`Particle`]: crate::particle::Particle
+    pub mass: Mass,
     /// The distance between [`Particle`]s in each direction.
     /// Measured in meters (m).
-    pub mass: Mass,
-    /// The spring constant between each pair of particles,
-    /// measured in newtons per meter (N/m).
+    ///
+    /// [`Particle`]: crate::particle::Particle
     pub spring_lengths: [Length; 3],
-    /// The mass of each individual [`Particle`] in kilograms (kg).
+    /// The spring constant between each pair of [`Particle`]s,
+    /// measured in newtons per meter (N/m).
+    ///
+    /// [`Particle`]: crate::particle::Particle
     pub spring_constant: dimension::SpringConstant,
-    /// The damping coefficient of the springs
-    /// in newton-seconds per meter (N⋅s⋅m⁻¹).
+    /// The damping coefficient of the [`Spring`]s
+    /// in newton-seconds per meter (N⋅s⋅m⁻¹)
+    /// or dimensionally equivalently in kilograms per second (kg/s).
+    ///
+    /// [`Spring`]: crate::particle::Spring
     pub damping: dimension::ViscousDamping,
     /// The amplitude of the driving force as a 3D vector
     /// measured in newtons (N).
@@ -45,7 +63,7 @@ pub struct InputJson {
     /// The angular frequency of the driving force
     /// in radians per second (rad/s).
     pub driving_angular_frequency: AngularVelocity,
-    /// The phase shift of the driving force, which is a dimensionless value.
+    /// The phase of the driving force in radians (rad).
     pub driving_phase: Angle,
 }
 
