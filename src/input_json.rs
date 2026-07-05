@@ -17,8 +17,6 @@ use uom::{
 };
 
 use crate::dimension;
-#[cfg(doc)]
-use crate::particle::{Particle, Spring};
 
 
 /// Stores the driving parameters as part of [`InputJson`].
