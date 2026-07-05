@@ -345,6 +345,9 @@ fn main() {
 Try checking if the output/ directory exists."
             );
         });
+    output_file
+        .set_len(0)
+        .unwrap_or_else(|_| println!("Failed to clear file {:?}", output_file_path));
     writeln!(
         output_file,
         "\
@@ -398,4 +401,6 @@ Input JSON: {}
             Some(&mut output_file),
         );
     }
+
+    // Flush the buffer at the end.
 }
