@@ -345,6 +345,8 @@ fn main() {
 Try checking if the output/ directory exists."
             );
         });
+    // Clear the file before writing to it.
+    // For some reason, opening a file with truncate() seems to result in an error.
     output_file
         .set_len(0)
         .unwrap_or_else(|_| println!("Failed to clear file {:?}", output_file_path));
