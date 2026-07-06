@@ -126,6 +126,23 @@ impl Neg for Vector3d {
     /// Returns the negative of this [3D vector].
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: -1.0,
+    ///         y: -1.0,
+    ///         z: -1.0,
+    ///     },
+    ///     -Vector3d {
+    ///         x: 1.0,
+    ///         y: 1.0,
+    ///         z: 1.0,
+    ///     }
+    /// )
+    /// ```
     fn neg(self) -> Self::Output {
         Vector3d {
             x: -self.x,
