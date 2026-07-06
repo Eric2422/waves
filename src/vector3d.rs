@@ -358,13 +358,20 @@ impl Div<f64> for Vector3d {
     /// [multiplying]: Vector3d::mul
     ///
     /// # Examples
+    ///
     /// ```rust
-    /// // Returns approximately [2, 4, 6]
-    /// Vector3d {
-    ///     x: 10,
-    ///     y: 20,
-    ///     z: 30,
-    /// } / 5
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 2.0,
+    ///         y: 4.0,
+    ///         z: 6.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0,
+    ///     } / 5.0
+    /// )
     /// ```
     fn div(self, rhs: f64) -> Self::Output {
         Vector3d {
@@ -379,6 +386,24 @@ impl DivAssign<f64> for Vector3d {
     /// Divide this [3D vector] by a scalar, *mutating it in the process*.
     ///
     /// [3D vector]: Vector3d
+    /// # Examples
+    ///
+    /// ```rust
+    /// let dividend_array = Vector3d {
+    ///     x: 10.0,
+    ///     y: 20.0,
+    ///     z: 30.0,
+    /// };
+    /// dividend_array /= 5.0;
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 2.0,
+    ///         y: 4.0,
+    ///         z: 6.0
+    ///     },
+    ///     dividend_array
+    /// )
+    /// ```
     fn div_assign(&mut self, rhs: f64) {
         self.x /= rhs;
         self.y /= rhs;
