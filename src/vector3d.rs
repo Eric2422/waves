@@ -434,8 +434,15 @@ impl Vector3d {
     /// # Examples
     ///
     /// ```rust
-    /// // Returns approximately 5.0.
-    /// Vector3d { x: 3, y: 4, z: 0 }
+    /// assert_eq!(
+    ///     3.0,
+    ///     (Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 2.0,
+    ///     })
+    ///     .get_magnitude()
+    /// );
     /// ```
     pub fn get_magnitude(&self) -> f64 {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
