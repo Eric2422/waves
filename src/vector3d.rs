@@ -435,6 +435,19 @@ impl Display for Vector3d {
 
 impl Vector3d {
     /// Return the zero vector, i.e., `Vector3d {x: 0.0, y: 0.0, z: 0.0}`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 0.0,
+    ///         y: 0.0,
+    ///         z: 0.0
+    ///     },
+    ///     Vector3d::zero()
+    /// );
+    /// ```
     pub fn zero() -> Vector3d {
         Vector3d {
             x: 0.0,
