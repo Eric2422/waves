@@ -20,9 +20,9 @@ pub struct Vector3d {
 /// or packs three [`f64`] floats into a [3D vector].
 ///
 /// [3D vector]: Vector3d
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// assert_eq!(Vector3d {0, 1, 2}, vector3d!([1, 2, 3]));
 /// assert_eq!(Vector3d {0, 1, 2}, vector3d!(1, 2, 3));
@@ -58,8 +58,22 @@ impl Add for Vector3d {
     /// # Examples
     ///
     /// ```rust
-    /// // Ignoring possible floating point errors, returns Vector3d {x: 4.0, y: 4.0, z: 4.0}.
-    /// Vector3d {x: 1.0, 2.0, 3.0) + Vector3d(3.0, y: 2.0, z: 1.0}
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 4.0,
+    ///         y: 4.0,
+    ///         z: 4.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     } + Vector3d {
+    ///         x: 3.0,
+    ///         y: 2.0,
+    ///         z: 1.0
+    ///     }
+    /// )
     /// ```
     fn add(self, rhs: Self) -> Self::Output {
         Vector3d {
