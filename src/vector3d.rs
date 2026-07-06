@@ -20,6 +20,13 @@ pub struct Vector3d {
 /// or packs three [`f64`] floats into a [3D vector].
 ///
 /// [3D vector]: Vector3d
+/// 
+/// # Examples
+/// 
+/// ```rust
+/// assert_eq!(Vector3d {0, 1, 2}, vector3d!([1, 2, 3]));
+/// assert_eq!(Vector3d {0, 1, 2}, vector3d!(1, 2, 3));
+/// ```
 #[macro_export]
 macro_rules! vector3d {
     ($array:expr) => {
