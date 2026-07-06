@@ -412,6 +412,22 @@ impl DivAssign<f64> for Vector3d {
 }
 
 impl Display for Vector3d {
+    /// Prints out the x, y, and z values in tuple vector notation.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     "(1.0, 2.0, 3.0)",
+    ///     (Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     })
+    ///     .to_string()
+    ///     .unwrap()
+    /// );
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
