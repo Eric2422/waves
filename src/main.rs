@@ -45,6 +45,36 @@ static OUTPUT_DIR_STRING: &str = "output";
 ///
 /// [`false`]: bool
 /// [`true`]: bool
+///
+/// # Examples
+/// ```rust
+/// // Invalidated by the negative mass.
+/// assert_eq!(
+///     false,
+///     InputJson {
+///         total_time_steps: 120,
+///         time_step_size: Time::new::<second>(0.5),
+///         dimensions: [5, 5, 5],
+///         particle_distances: [
+///             Length::new::<meter>(1.0),
+///             Length::new::<meter>(1.0),
+///             Length::new::<meter>(1.0)
+///         ],
+///         mass: Mass::new::<kilogram>(-1.0),
+///         spring_constant: SurfaceTension::new::<newton_per_meter>(1.0),
+///         damping: MassRate::new::<kilogram_per_second>(1.0),
+///         driving: DrivingParameters {
+///             amplitude: [
+///                 Force::new::<newton>(1.0),
+///                 Force::new::<newton>(0.0),
+///                 Force::new::<newton>(0.0)
+///             ],
+///             angular_frequency: AngularVelocity::new::<radian_per_second>(1.0),
+///             phase: Angle::new::<radain>(0.0)
+///         }
+///     }
+/// );
+/// ```
 fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) -> bool {
     let mut passed_all_checks = true;
 
