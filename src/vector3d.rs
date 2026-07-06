@@ -89,6 +89,30 @@ impl AddAssign for Vector3d {
     ///
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let example_vector = Vector3d {
+    ///     x: 2.0,
+    ///     y: 4.0,
+    ///     z: 6.0,
+    /// };
+    /// example_vector += Vector3d {
+    ///     x: 1.0,
+    ///     y: 2.0,
+    ///     z: 3.0,
+    /// };
+    ///
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 3.0,
+    ///         y: 5.0,
+    ///         z: 9.0
+    ///     },
+    ///     example_vector
+    /// );
+    /// ```
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
