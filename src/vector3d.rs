@@ -160,6 +160,27 @@ impl Sub for Vector3d {
     ///
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 4.0,
+    ///         y: 4.0,
+    ///         z: 4.0
+    ///     } - Vector3d {
+    ///         x: 3.0,
+    ///         y: 2.0,
+    ///         z: 1.0
+    ///     }
+    /// )
+    /// ```
     fn sub(self, rhs: Self) -> Self::Output {
         Vector3d {
             x: self.x - rhs.x,
@@ -174,6 +195,30 @@ impl SubAssign for Vector3d {
     ///
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
+    ///
+    ///     /// # Examples
+    ///
+    /// ```rust
+    /// let example_vector = Vector3d {
+    ///     x: 3.0,
+    ///     y: 5.0,
+    ///     z: 9.0,
+    /// };
+    /// example_vector -= Vector3d {
+    ///     x: 1.0,
+    ///     y: 2.0,
+    ///     z: 3.0,
+    /// };
+    ///
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 2.0,
+    ///         y: 4.0,
+    ///         z: 6.0,
+    ///     },
+    ///     example_vector
+    /// );
+    /// ```
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
