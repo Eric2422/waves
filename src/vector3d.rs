@@ -196,7 +196,7 @@ impl SubAssign for Vector3d {
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
     ///
-    ///     /// # Examples
+    /// # Examples
     ///
     /// ```rust
     /// let example_vector = Vector3d {
@@ -231,15 +231,24 @@ impl Mul<f64> for Vector3d {
 
     /// Returns the product between this [3D vector] and a scalar.
     ///
-    /// ```rust
-    /// // Returns Vector3d {x: 10.0, y: 20.0, z: 30.0}.
-    /// Vector3d {
-    ///     x: 1.0,
-    ///     y: 2.0,
-    ///     z: 3.0,
-    /// } * 10.0
-    /// ```
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0,
+    ///     } * 10.0
+    /// )
+    /// ```
     fn mul(self, rhs: f64) -> Self::Output {
         Vector3d {
             x: self.x * rhs,
@@ -255,6 +264,23 @@ impl Mul<Vector3d> for f64 {
     /// Returns the product between this scalar and a [3D vector].
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0
+    ///     },
+    ///     10.0 * Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0,
+    ///     }
+    /// )
+    /// ```
     fn mul(self, rhs: Vector3d) -> Self::Output {
         Vector3d {
             x: self * rhs.x,
@@ -266,6 +292,25 @@ impl Mul<Vector3d> for f64 {
 
 impl MulAssign<f64> for Vector3d {
     /// Multiply this [`Vector3d`] by a scalar, *mutating it in the process*.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let example_vector = Vector3d {
+    ///     x: 1.0,
+    ///     y: 2.0,
+    ///     z: 3.0,
+    /// };
+    /// example_vector *= 10.0;
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0,
+    ///     },
+    ///     example_vector
+    /// );
+    /// ```
     fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
         self.y *= rhs;
@@ -279,6 +324,23 @@ impl Mul<Vector3d> for Vector3d {
     /// Return the dot product of this [3D vector] and another [3D vector].
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     22.0,
+    ///     Vector3d {
+    ///         x: 3.0,
+    ///         y: 4.0,
+    ///         z: 5.0
+    ///     } * Vector3d {
+    ///         x: 3.0,
+    ///         y: 2.0,
+    ///         z: 1.0
+    ///     }
+    /// );
+    /// ```
     fn mul(self, rhs: Vector3d) -> Self::Output {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
