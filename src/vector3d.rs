@@ -467,6 +467,24 @@ impl Vector3d {
     /// Return the normalized unit vector of this [3D vector].
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 0.33,
+    ///         y: 0.67,
+    ///         z: 0.67
+    ///     },
+    ///     (Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 2.0
+    ///     })
+    ///     .get_normalized()
+    /// );
+    /// ```
     pub fn get_normalized(&self) -> Vector3d {
         *self / self.get_magnitude()
     }
