@@ -386,6 +386,7 @@ impl DivAssign<f64> for Vector3d {
     /// Divide this [3D vector] by a scalar, *mutating it in the process*.
     ///
     /// [3D vector]: Vector3d
+    /// 
     /// # Examples
     ///
     /// ```rust
