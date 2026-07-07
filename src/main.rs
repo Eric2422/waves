@@ -379,7 +379,7 @@ Try checking if the output/ directory exists."
     // For some reason, opening a file with truncate() seems to result in an error.
     output_file
         .set_len(0)
-        .unwrap_or_else(|_| println!("Failed to clear file {:?}", output_file_path));
+        .unwrap_or_else(|_| println!("Warning: Failed to clear file {:?}", output_file_path));
     writeln!(
         output_file,
         "\
@@ -420,7 +420,7 @@ Input JSON: {}
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
-            println!("WARNING: Failed to write to {output_file_path:?}.");
+            println!("Warning: Failed to write to {output_file_path:?}.");
         });
 
         current_time += input_json.time_step_size;
