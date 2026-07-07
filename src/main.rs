@@ -35,18 +35,26 @@ use crate::{
 /// but [`Path`]s can not be instantiated statically.
 static OUTPUT_DIR_STRING: &str = "output";
 
-/// Checks for various illogical input JSON settings.
-/// Corrects time step size, mass, and spring constant to [`f64::MIN_POSITIVE`]
-/// if 0.0.
-/// Sets time step size, mass, spring constant, damping, and spring lengths to
-/// their absolute values if negative.
+/// Checks for various illogical [input JSON] settings.
+/// Corrects [time step size], [mass], and [spring constant] to
+/// [`f64::MIN_POSITIVE`] if 0.0.
+/// Sets [time step size], [mass], [spring constant], [damping], and
+/// [particle distances] to their absolute values if negative.
 ///
-/// If any such corrections are made, return [`false`]. Else, return [`true`].
+/// If any such corrections are made, return [`false`].
+/// Else, return [`true`].
 ///
+/// [input JSON]: InputJson
+/// [time step size]: InputJson::time_step_size
+/// [mass]: InputJson::mass
+/// [spring constant]: InputJson::spring_constant
+/// [damping]: InputJson::damping
+/// [particle distances]: InputJson::particle_distances
 /// [`false`]: bool
 /// [`true`]: bool
 ///
 /// # Examples
+///
 /// ```rust
 /// // Invalidated by the negative mass.
 /// assert_eq!(
