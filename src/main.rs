@@ -394,11 +394,12 @@ Try checking if the output/ directory exists."
     output_file
         .set_len(0)
         .unwrap_or_else(|_| println!("Warning: Failed to clear file {:?}", output_file_path));
+    // Add information about the input JSON file to the top.
     writeln!(
         output_file,
         "\
 Input JSON: {}
-{}",
+{}\n",
         &args[1], input_json
     )
     .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
@@ -430,7 +431,7 @@ Input JSON: {}
     for i in 0..=input_json.total_time_steps {
         writeln!(
             output_file,
-            "\n\nTime step {i}, t = {}",
+            "\nTime step {i}, t = {}",
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
