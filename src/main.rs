@@ -306,6 +306,12 @@ fn update_particles(
                 particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
             }
         }
+
+        // Blank line just to make the output easier to understand.
+        match output_file {
+            Some(ref mut output_file) => writeln!(output_file).unwrap_or_else(|_| {}),
+            None => {}
+        }
     }
 
     // Update position separately to prevent it from affecting spring force
@@ -424,7 +430,7 @@ Input JSON: {}
     for i in 0..=input_json.total_time_steps {
         writeln!(
             output_file,
-            "\nTime step {i}, t = {}",
+            "\n\nTime step {i}, t = {}",
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
