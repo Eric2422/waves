@@ -433,6 +433,4 @@ Input JSON: {}
             Some(&mut output_file),
         );
     }
-
-    // Flush the buffer at the end.
 }
