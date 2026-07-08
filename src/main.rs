@@ -388,7 +388,7 @@ Try checking if the output/ directory exists."
     // For some reason, opening a file with truncate() seems to result in an error.
     output_file
         .set_len(0)
-        .unwrap_or_else(|_| println!("Warning: Failed to clear file {:?}", output_file_path));
+        .unwrap_or_else(|_| println!("Warning: Failed to clear file {output_file_path:?}."));
     // Add information about the input JSON file to the top.
     writeln!(
         output_file,
@@ -437,8 +437,13 @@ Input JSON: {}
 
         // Calculate and print the particles.
         match update_particles(&mut particles, &input_json, current_time) {
-            Ok(output_string) => write!(output_file, "{}", output_string).unwrap_or_else(|_| {}),
-            Err(_) => todo!(),
+            Ok(output_string) => write!(output_file, "{}", output_string).unwrap_or_else(|_| {
+                println!(
+                    "Warning: Failed to write time step {i} (t = {}) into {output_file_path:?}.",
+                    current_time.into_format_args(second, Abbreviation)
+                );
+            }),
+            Err(_) => println!("Warning: Failed to write one or more particles' states to output."),
         };
     }
 }
