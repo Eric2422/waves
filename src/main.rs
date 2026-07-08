@@ -4,8 +4,10 @@ mod particle;
 mod vector3d;
 
 use std::{
-    cmp, env, fs,
-    io::Write,
+    cmp, env,
+    fmt::{self, Write as _},
+    fs,
+    io::{self, Write},
     path::{Path, PathBuf},
 };
 
@@ -254,19 +256,16 @@ fn calculate_spring_force(
 /// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
 /// [`Particle`]s.
 ///
-/// If the value in `output_file` is [`None`], no output will be written.
-/// If it is [`Some`], output will written to the given [`File`].
+/// Returns a [`String`] of the [`Particle`]'s states before updating.
 ///
 /// [`acceleration`]: Particle::acceleration
 /// [`velocity`]: Particle::velocity
 /// [`position`]: Particle::position
-/// [`File`]: fs::File
 fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: Time,
-    mut output_file: Option<&mut fs::File>,
-) {
+) -> Result<String, fmt::Error> {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
         input_json.driving.amplitude[0].value,
@@ -276,18 +275,15 @@ fn update_particles(
         + input_json.driving.phase.value)
         .cos();
 
+    let mut output_string = String::new();
+
     // Apply forces to all particles.
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
                 // To avoid having to loop through again,
-                // output the `Particle` states to a file.
-                match output_file {
-                    Some(ref mut output_file) => {
-                        writeln!(output_file, "{}", particles[x][y][z]).unwrap_or_else(|_| {})
-                    }
-                    None => {}
-                }
+                // output the `Particle` states to a `String`.
+                writeln!(&mut output_string, "{}", particles[x][y][z])?;
 
                 let mut total_force = calculate_spring_force(
                     particles,
@@ -306,6 +302,9 @@ fn update_particles(
                 particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
             }
         }
+
+        // Blank line just to make the output easier to understand.
+        writeln!(&mut output_string)?;
     }
 
     // Update position separately to prevent it from affecting spring force
@@ -321,6 +320,8 @@ fn update_particles(
             }
         }
     }
+
+    return Ok(output_string);
 }
 
 fn main() {
@@ -387,12 +388,13 @@ Try checking if the output/ directory exists."
     // For some reason, opening a file with truncate() seems to result in an error.
     output_file
         .set_len(0)
-        .unwrap_or_else(|_| println!("Warning: Failed to clear file {:?}", output_file_path));
+        .unwrap_or_else(|_| println!("Warning: Failed to clear file {output_file_path:?}."));
+    // Add information about the input JSON file to the top.
     writeln!(
         output_file,
         "\
 Input JSON: {}
-{}",
+{}\n",
         &args[1], input_json
     )
     .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
@@ -434,11 +436,14 @@ Input JSON: {}
         current_time += input_json.time_step_size;
 
         // Calculate and print the particles.
-        update_particles(
-            &mut particles,
-            &input_json,
-            current_time,
-            Some(&mut output_file),
-        );
+        match update_particles(&mut particles, &input_json, current_time) {
+            Ok(output_string) => write!(output_file, "{}", output_string).unwrap_or_else(|_| {
+                println!(
+                    "Warning: Failed to write time step {i} (t = {}) into {output_file_path:?}.",
+                    current_time.into_format_args(second, Abbreviation)
+                );
+            }),
+            Err(_) => println!("Warning: Failed to write one or more particles' states to output."),
+        };
     }
 }
