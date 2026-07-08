@@ -263,7 +263,7 @@ fn calculate_spring_force(
 /// [`velocity`]: Particle::velocity
 /// [`position`]: Particle::position
 /// [`File`]: fs::File
-fn update_particles<'a>(
+fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: Time,
