@@ -4,8 +4,10 @@ mod particle;
 mod vector3d;
 
 use std::{
-    cmp, env, fs,
-    io::Write,
+    cmp, env,
+    fmt::{self, Write as _},
+    fs,
+    io::{self, Write},
     path::{Path, PathBuf},
 };
 
@@ -261,12 +263,11 @@ fn calculate_spring_force(
 /// [`velocity`]: Particle::velocity
 /// [`position`]: Particle::position
 /// [`File`]: fs::File
-fn update_particles(
+fn update_particles<'a>(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: Time,
-    mut output_file: Option<&mut fs::File>,
-) {
+) -> Result<String, fmt::Error> {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
         input_json.driving.amplitude[0].value,
@@ -276,18 +277,15 @@ fn update_particles(
         + input_json.driving.phase.value)
         .cos();
 
+    let mut output_string = String::new();
+
     // Apply forces to all particles.
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
                 // To avoid having to loop through again,
                 // output the `Particle` states to a file.
-                match output_file {
-                    Some(ref mut output_file) => {
-                        writeln!(output_file, "{}", particles[x][y][z]).unwrap_or_else(|_| {})
-                    }
-                    None => {}
-                }
+                writeln!(&mut output_string, "{}", particles[x][y][z])?;
 
                 let mut total_force = calculate_spring_force(
                     particles,
@@ -308,10 +306,7 @@ fn update_particles(
         }
 
         // Blank line just to make the output easier to understand.
-        match output_file {
-            Some(ref mut output_file) => writeln!(output_file).unwrap_or_else(|_| {}),
-            None => {}
-        }
+        writeln!(&mut output_string)?;
     }
 
     // Update position separately to prevent it from affecting spring force
@@ -327,6 +322,8 @@ fn update_particles(
             }
         }
     }
+
+    return Ok(output_string);
 }
 
 fn main() {
@@ -441,11 +438,9 @@ Input JSON: {}
         current_time += input_json.time_step_size;
 
         // Calculate and print the particles.
-        update_particles(
-            &mut particles,
-            &input_json,
-            current_time,
-            Some(&mut output_file),
-        );
+        match update_particles(&mut particles, &input_json, current_time) {
+            Ok(output_string) => write!(output_file, "{}", output_string).unwrap_or_else(|_| {}),
+            Err(_) => todo!(),
+        };
     }
 }
