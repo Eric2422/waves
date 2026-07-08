@@ -256,13 +256,11 @@ fn calculate_spring_force(
 /// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
 /// [`Particle`]s.
 ///
-/// If the value in `output_file` is [`None`], no output will be written.
-/// If it is [`Some`], output will written to the given [`File`].
+/// Returns a [`String`] of the [`Particle`]'s states before updating.
 ///
 /// [`acceleration`]: Particle::acceleration
 /// [`velocity`]: Particle::velocity
 /// [`position`]: Particle::position
-/// [`File`]: fs::File
 fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
@@ -284,7 +282,7 @@ fn update_particles(
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
                 // To avoid having to loop through again,
-                // output the `Particle` states to a file.
+                // output the `Particle` states to a `String`.
                 writeln!(&mut output_string, "{}", particles[x][y][z])?;
 
                 let mut total_force = calculate_spring_force(
