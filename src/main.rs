@@ -342,11 +342,11 @@ fn main() {
             .with_extension("txt")
             .file_name()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file_path:?} is an invalid OS string!")
+                panic!("ERROR: The input file path {input_file_path:?} is an invalid OS string!")
             })
             .to_str()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file_path:?} is an invalid string!")
+                panic!("ERROR: The input file path {input_file_path:?} is an invalid string!")
             }),
     ]
     .iter()
@@ -354,19 +354,16 @@ fn main() {
 
     // Attempt to retreive the contents of the file.
     let file_contents = fs::read_to_string(input_file_path).unwrap_or_else(|_| {
-        panic!(
-            "ERROR: File `{input_file_path:?}` could not be read. Try checking if the file exists!"
-        )
+        panic!("ERROR: The input file {input_file_path:?} could not be read! Try checking if it exists.")
     });
 
     // Attempt to parse the file into usable data.
-    let mut input_json: InputJson= serde_json::from_str(&file_contents)
-        .unwrap_or_else(
-            |_| panic!(
-                "ERROR: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample!",
-                &args[1]
-            )
-        );
+    let mut input_json: InputJson = serde_json::from_str(&file_contents).unwrap_or_else(|_| {
+        panic!(
+            "ERROR: The input file {input_file_path:?} is malformatted!
+Check to make sure that it is properly formatted as given in \"README.md\".",
+        )
+    });
 
     // Check for invalid values and correct them if found.
     if check_input_json(input_file_path, &mut input_json) {
@@ -380,24 +377,26 @@ fn main() {
         .open(&output_file_path)
         .unwrap_or_else(|_| {
             panic!(
-                "ERROR: Unable to create or open {output_file_path:?}!
-Try checking if the output/ directory exists."
+                "ERROR: Unable to create or open the output file {output_file_path:?}!
+Try checking if the \"output/\" directory exists."
             );
         });
     // Clear the file before writing to it.
     // For some reason, opening a file with truncate() seems to result in an error.
-    output_file
-        .set_len(0)
-        .unwrap_or_else(|_| println!("Warning: Failed to clear file {output_file_path:?}."));
+    output_file.set_len(0).unwrap_or_else(|_| {
+        println!("Warning: Failed to clear the output file {output_file_path:?}.")
+    });
     // Add information about the input JSON file to the top.
     writeln!(
         output_file,
         "\
-Input JSON: {}
+Input JSON: {input_file_path:?}
 {}\n",
-        &args[1], input_json
+        input_json
     )
-    .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
+    .unwrap_or_else(|_| {
+        println!("Warning: Failed to write to the output file {output_file_path:?}.")
+    });
 
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
@@ -430,7 +429,7 @@ Input JSON: {}
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
-            println!("Warning: Failed to write to {output_file_path:?}.");
+            println!("Warning: Failed to write to the output file {output_file_path:?}.");
         });
 
         current_time += input_json.time_step_size;
@@ -439,11 +438,11 @@ Input JSON: {}
         match update_particles(&mut particles, &input_json, current_time) {
             Ok(output_string) => write!(output_file, "{}", output_string).unwrap_or_else(|_| {
                 println!(
-                    "Warning: Failed to write time step {i} (t = {}) into {output_file_path:?}.",
+                    "Warning: Failed to write time step {i} (t = {}) into the output file {output_file_path:?}.",
                     current_time.into_format_args(second, Abbreviation)
                 );
             }),
-            Err(_) => println!("Warning: Failed to write one or more particles' states to output."),
+            Err(_) => println!("Warning: Failed to append a particle(s) to the output string."),
         };
     }
 }
