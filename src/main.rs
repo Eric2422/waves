@@ -5,7 +5,7 @@ mod vector3d;
 
 use std::{
     cmp, env,
-    fmt::{self, Write as _},
+    fmt::Write as _,
     fs,
     io::Write,
     path::{Path, PathBuf},
@@ -266,7 +266,7 @@ fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: Time,
-) -> result::Result<String, fmt::Error> {
+) -> result::Result<String, String> {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
         input_json.driving.amplitude[0].value,
@@ -284,7 +284,15 @@ fn update_particles(
             for z in 0..particles[x][y].len() {
                 // To avoid having to loop through again,
                 // output the `Particle` states to a `String`.
-                writeln!(&mut output_string, "{}", particles[x][y][z])?;
+                match writeln!(&mut output_string, "{}", particles[x][y][z]) {
+                    Ok(_) => {}
+                    Err(_) => {
+                        return Err(format!(
+                            "ERROR: Failed to write Particle {} at of indices ({x}, {y}, {z}) to the output string!",
+                            particles[x][y][z].id
+                        ));
+                    }
+                }
 
                 let mut total_force = calculate_spring_force(
                     particles,
@@ -305,7 +313,14 @@ fn update_particles(
         }
 
         // Blank line just to make the output easier to understand.
-        writeln!(&mut output_string)?;
+        match writeln!(&mut output_string) {
+            Ok(_) => {}
+            Err(_) => {
+                return Err(format!(
+                    "ERROR: Failed to write newline after x-index {x} to the output string!"
+                ));
+            }
+        };
     }
 
     // Update position separately to prevent it from affecting spring force
@@ -443,7 +458,7 @@ Input JSON: {input_file_path:?}
                     current_time.into_format_args(second, Abbreviation)
                 );
             }),
-            Err(_) => println!("Warning: Failed to append a particle(s) to the output string."),
+            Err(error) => panic!("{}", error),
         };
     }
 }
