@@ -23,7 +23,7 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 /// A single particle in a longitudinal wave,
 /// each connected to other particles by linear springs.
 pub struct Particle {
-    id: usize,
+    pub id: usize,
     /// The mass of this particle in kilograms (kg).
     pub mass: Mass,
     /// The position of this particle as a 3D vector in meters (m).
