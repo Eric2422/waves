@@ -7,8 +7,9 @@ use std::{
     cmp, env,
     fmt::{self, Write as _},
     fs,
-    io::{self, Write},
+    io::Write,
     path::{Path, PathBuf},
+    result,
 };
 
 use uom::{
@@ -265,7 +266,7 @@ fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: Time,
-) -> Result<String, fmt::Error> {
+) -> result::Result<String, fmt::Error> {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
         input_json.driving.amplitude[0].value,
