@@ -241,11 +241,15 @@ fn calculate_spring_force(
                         (z as f64 - center_z as f64) * spring_lengths[2].value
                     )
                     .get_magnitude();
-
-                    // Apply Hooke's Law.
-                    spring_force += -spring_constant.value
+                    
+                    let force = -spring_constant.value
                         * (distance_vector.get_magnitude() - resting_length)
                         * distance_vector.get_normalized();
+                    
+                    println!("Force between {} and {}: {force} N", center_particle.id, particles[x][y][z].id);
+
+                    // Apply Hooke's Law.
+                    spring_force += force;
                 }
             }
         }
