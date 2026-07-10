@@ -9,28 +9,28 @@ Waves are simulated as equidistant particles connected by linear springs.
 The input files are JSON files in the [`input/`] directory.
 Below is a sample of an input file.
 
-The time step size is in seconds (s).
+The time step size is in seconds ($\mathrm{s}$).
 
 The dimensions are the number of particles along each axis.
 
-The particle distances in meters (m).
+The particle distances in meters ($\mathrm{m}$).
 A diagonal spring will have a greater length than the listed distances
 as given by Pythagorean's Theorem.
 A spring along the x-axis will have the length of the first element,
 and so forth for springs along the y- and z-axes.
 
-The mass is in kilograms (kg).
+The mass is in kilograms ($\mathrm{kg}$).
 
-The spring constant is in newtons per meter (N/m).
+The spring constant is in newtons per meter ($\mathrm{N/m}$).
 
-The damping is in newton-seconds per meter (N⋅m⋅s⁻¹)
-or dimensionally equivalent to kilograms per second (kg/s).
+The damping is in newton-seconds per meter ($\mathrm{N \cdot m \cdot s^{-1}}$)
+or dimensionally equivalent to kilograms per second ($\mathrm{kg/s}$).
 
-The driving amplitude is in newtons (N).
+The driving amplitude is in newtons ($\mathrm{N}$).
 
-The driving angular frequency is in radians per second (rad/s).
+The driving angular frequency is in radians per second ($\mathrm{rad/s}$).
 
-The driving phase is in radians (rad).
+The driving phase is in radians ($\mathrm{rad}$).
 
 ```json
 {

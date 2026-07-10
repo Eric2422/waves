@@ -2,6 +2,7 @@
     "cSpell.words": [
         "autocfg",
         "itoa",
+        "mathrm",
         "nalgebra",
         "serde",
         "typenum",
