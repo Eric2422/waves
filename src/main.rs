@@ -407,8 +407,7 @@ Try checking if the \"output/\" directory exists."
         output_file,
         "\
 Input JSON: {input_file_path:?}
-{}\n",
-        input_json
+{input_json}\n"
     )
     .unwrap_or_else(|_| {
         println!("Warning: Failed to write to the output file {output_file_path:?}.")
@@ -452,13 +451,13 @@ Input JSON: {input_file_path:?}
 
         // Calculate and print the particles.
         match update_particles(&mut particles, &input_json, current_time) {
-            Ok(output_string) => write!(output_file, "{}", output_string).unwrap_or_else(|_| {
+            Ok(output_string) => write!(output_file, "{output_string}").unwrap_or_else(|_| {
                 println!(
                     "Warning: Failed to write time step {i} (t = {}) into the output file {output_file_path:?}.",
                     current_time.into_format_args(second, Abbreviation)
                 );
             }),
-            Err(error) => panic!("{}", error),
+            Err(error) => panic!("{error}"),
         };
     }
 }
