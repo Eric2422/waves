@@ -23,6 +23,13 @@ pub struct Vector3d<Q> {
 /// or packs three [`f64`] floats into a [3D vector].
 ///
 /// [3D vector]: Vector3d
+///
+/// # Examples
+///
+/// ```rust
+/// assert_eq!(Vector3d {0, 1, 2}, vector3d!([1, 2, 3]));
+/// assert_eq!(Vector3d {0, 1, 2}, vector3d!(1, 2, 3));
+/// ```
 #[macro_export]
 macro_rules! vector3d {
     ($array:expr) => {
@@ -54,16 +61,22 @@ impl<Q: std::ops::Add<Output = Q>> Add for Vector3d<Q> {
     /// # Examples
     ///
     /// ```rust
-    /// // Ignoring possible floating point errors, returns Vector3d {x: 4.0, y: 4.0, z: 4.0}.
-    /// Vector3d {
-    ///     x: 1.0,
-    ///     y: 2.0,
-    ///     z: 3.0,
-    /// } + Vector3d {
-    ///     x: 3.0,
-    ///     y: 2.0,
-    ///     z: 1.0,
-    /// }
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 4.0,
+    ///         y: 4.0,
+    ///         z: 4.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     } + Vector3d {
+    ///         x: 3.0,
+    ///         y: 2.0,
+    ///         z: 1.0
+    ///     }
+    /// )
     /// ```
     fn add(self, rhs: Self) -> Self::Output {
         Vector3d {
@@ -79,6 +92,30 @@ impl<Q: std::ops::AddAssign> AddAssign for Vector3d<Q> {
     ///
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let example_vector = Vector3d {
+    ///     x: 2.0,
+    ///     y: 4.0,
+    ///     z: 6.0,
+    /// };
+    /// example_vector += Vector3d {
+    ///     x: 1.0,
+    ///     y: 2.0,
+    ///     z: 3.0,
+    /// };
+    ///
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 3.0,
+    ///         y: 5.0,
+    ///         z: 9.0
+    ///     },
+    ///     example_vector
+    /// );
+    /// ```
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
@@ -92,6 +129,23 @@ impl<Q: std::ops::Neg<Output = Q>> Neg for Vector3d<Q> {
     /// Returns the negative of this [3D vector].
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: -1.0,
+    ///         y: -1.0,
+    ///         z: -1.0,
+    ///     },
+    ///     -Vector3d {
+    ///         x: 1.0,
+    ///         y: 1.0,
+    ///         z: 1.0,
+    ///     }
+    /// )
+    /// ```
     fn neg(self) -> Self::Output {
         Vector3d {
             x: -self.x,
@@ -109,6 +163,27 @@ impl<Q: std::ops::Sub<Output = Q>> Sub for Vector3d<Q> {
     ///
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 4.0,
+    ///         y: 4.0,
+    ///         z: 4.0
+    ///     } - Vector3d {
+    ///         x: 3.0,
+    ///         y: 2.0,
+    ///         z: 1.0
+    ///     }
+    /// )
+    /// ```
     fn sub(self, rhs: Self) -> Self::Output {
         Vector3d {
             x: self.x - rhs.x,
@@ -123,6 +198,30 @@ impl<Q: std::ops::SubAssign> SubAssign for Vector3d<Q> {
     ///
     /// [3D vector]: Vector3d
     /// [vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let example_vector = Vector3d {
+    ///     x: 3.0,
+    ///     y: 5.0,
+    ///     z: 9.0,
+    /// };
+    /// example_vector -= Vector3d {
+    ///     x: 1.0,
+    ///     y: 2.0,
+    ///     z: 3.0,
+    /// };
+    ///
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 2.0,
+    ///         y: 4.0,
+    ///         z: 6.0,
+    ///     },
+    ///     example_vector
+    /// );
+    /// ```
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
@@ -135,15 +234,24 @@ impl<Q: std::ops::Mul<f64, Output = Q>> Mul<f64> for Vector3d<Q> {
 
     /// Returns the product between this [3D vector] and a scalar.
     ///
-    /// ```rust
-    /// // Returns Vector3d {x: 10.0, y: 20.0, z: 30.0}.
-    /// Vector3d {
-    ///     x: 1.0,
-    ///     y: 2.0,
-    ///     z: 3.0,
-    /// } * 10.0
-    /// ```
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0,
+    ///     } * 10.0
+    /// )
+    /// ```
     fn mul(self, rhs: f64) -> Self::Output {
         Vector3d {
             x: self.x * rhs,
@@ -159,6 +267,23 @@ impl<Q> Mul<Vector3d<Q>> for Q {
     /// Returns the product between this scalar and a [3D vector].
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0
+    ///     },
+    ///     10.0 * Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0,
+    ///     }
+    /// )
+    /// ```
     fn mul(self, rhs: Vector3d<Q>) -> Self::Output {
         Vector3d {
             x: self * rhs.x,
@@ -170,6 +295,25 @@ impl<Q> Mul<Vector3d<Q>> for Q {
 
 impl<Q: std::ops::MulAssign<f64>> MulAssign<f64> for Vector3d<Q> {
     /// Multiply this [`Vector3d`] by a scalar, *mutating it in the process*.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let example_vector = Vector3d {
+    ///     x: 1.0,
+    ///     y: 2.0,
+    ///     z: 3.0,
+    /// };
+    /// example_vector *= 10.0;
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0,
+    ///     },
+    ///     example_vector
+    /// );
+    /// ```
     fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
         self.y *= rhs;
@@ -189,13 +333,20 @@ impl<Q: std::ops::Div<f64, Output = Q>> Div<f64> for Vector3d<Q> {
     /// [multiplying]: Vector3d::mul
     ///
     /// # Examples
+    ///
     /// ```rust
-    /// // Returns approximately [2, 4, 6]
-    /// Vector3d {
-    ///     x: 10,
-    ///     y: 20,
-    ///     z: 30,
-    /// } / 5
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 2.0,
+    ///         y: 4.0,
+    ///         z: 6.0
+    ///     },
+    ///     Vector3d {
+    ///         x: 10.0,
+    ///         y: 20.0,
+    ///         z: 30.0,
+    ///     } / 5.0
+    /// )
     /// ```
     fn div(self, rhs: f64) -> Self::Output {
         Vector3d {
@@ -210,6 +361,25 @@ impl<Q: std::ops::DivAssign<f64>> DivAssign<f64> for Vector3d<Q> {
     /// Divide this [3D vector] by a scalar, *mutating it in the process*.
     ///
     /// [3D vector]: Vector3d
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let dividend_array = Vector3d {
+    ///     x: 10.0,
+    ///     y: 20.0,
+    ///     z: 30.0,
+    /// };
+    /// dividend_array /= 5.0;
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 2.0,
+    ///         y: 4.0,
+    ///         z: 6.0
+    ///     },
+    ///     dividend_array
+    /// )
+    /// ```
     fn div_assign(&mut self, rhs: f64) {
         self.x /= rhs;
         self.y /= rhs;
@@ -218,6 +388,22 @@ impl<Q: std::ops::DivAssign<f64>> DivAssign<f64> for Vector3d<Q> {
 }
 
 impl<Q: std::fmt::Debug> Display for Vector3d<Q> {
+    /// Prints out the x, y, and z values in tuple vector notation.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     "(1.0, 2.0, 3.0)",
+    ///     (Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 3.0
+    ///     })
+    ///     .to_string()
+    ///     .unwrap()
+    /// );
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({:?}, {:?}, {:?})", self.x, self.y, self.z)
     }
@@ -230,6 +416,19 @@ where
     <D as Dimension>::Kind: Sized,
 {
     /// Return the zero vector, i.e., `Vector3d {x: 0.0, y: 0.0, z: 0.0}`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 0.0,
+    ///         y: 0.0,
+    ///         z: 0.0
+    ///     },
+    ///     Vector3d::zero()
+    /// );
+    /// ```
     pub fn zero() -> Vector3d<Q> {
         Vector3d {
             // The default value should 0.0, but is highly fragile.
@@ -247,8 +446,15 @@ where
     /// # Examples
     ///
     /// ```rust
-    /// // Returns approximately 5.0.
-    /// Vector3d { x: 3, y: 4, z: 0 }
+    /// assert_eq!(
+    ///     3.0,
+    ///     (Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 2.0,
+    ///     })
+    ///     .get_magnitude()
+    /// );
     /// ```
     pub fn get_magnitude(&self) -> D {
         (self.x.powi(uom::typenum::P2::new())
@@ -259,7 +465,25 @@ where
 
     /// Return the normalized unit vector of this [3D vector].
     ///
-    /// [3D vector]: Vector3d
+    /// [3D vector]: Vector3d    
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// assert_eq!(
+    ///     Vector3d {
+    ///         x: 0.33,
+    ///         y: 0.67,
+    ///         z: 0.67
+    ///     },
+    ///     (Vector3d {
+    ///         x: 1.0,
+    ///         y: 2.0,
+    ///         z: 2.0
+    ///     })
+    ///     .get_normalized()
+    /// );
+    /// ```
     pub fn get_normalized(&self) -> Vector3d<Q> {
         *self / self.get_magnitude()
     }

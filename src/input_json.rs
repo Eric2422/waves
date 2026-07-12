@@ -19,6 +19,19 @@ use uom::{
 use crate::dimension;
 
 
+/// Stores the driving parameters as part of [`InputJson`].
+#[derive(Serialize, Deserialize)]
+pub struct DrivingParameters {
+    /// The amplitude of the driving force as a 3D vector
+    /// measured in newtons (N).
+    pub amplitude: [Force; 3],
+    /// The angular frequency of the driving force
+    /// in radians per second (rad/s).
+    pub angular_frequency: AngularVelocity,
+    /// The phase of the driving force in radians (rad).
+    pub phase: Angle,
+}
+
 /// Stores the parameters given in an input JSON file.
 #[derive(Serialize, Deserialize)]
 pub struct InputJson {
@@ -27,26 +40,31 @@ pub struct InputJson {
     /// Size of each time step in seconds (s).
     pub time_step_size: Time,
     /// The number of [`Particle`]s in each direction: x, y, and z.
+    ///
+    /// [`Particle`]: crate::particle::Particle
     pub dimensions: [usize; 3],
     /// The distance between [`Particle`]s in each direction.
     /// Measured in meters (m).
-    pub mass: Mass,
-    /// The spring constant between each pair of particles,
-    /// measured in newtons per meter (N/m).
-    pub spring_lengths: [Length; 3],
+    ///
+    /// [`Particle`]: crate::particle::Particle
+    pub particle_distances: [Length; 3],
+    ///
     /// The mass of each individual [`Particle`] in kilograms (kg).
+    ///
+    /// [`Particle`]: crate::particle::Particle
+    pub mass: Mass,
+    /// The spring constant between each pair of [`Particle`]s,
+    /// measured in newtons per meter (N/m).
+    ///
+    /// [`Particle`]: crate::particle::Particle
     pub spring_constant: dimension::SpringConstant,
-    /// The damping coefficient of the springs
-    /// in newton-seconds per meter (N⋅s⋅m⁻¹).
+    /// The damping coefficient of the [`Spring`]s
+    /// in newton-seconds per meter (N⋅s⋅m⁻¹)
+    /// or dimensionally equivalently in kilograms per second (kg/s).
+    ///
+    /// [`Spring`]: crate::particle::Spring
     pub damping: dimension::ViscousDamping,
-    /// The amplitude of the driving force as a 3D vector
-    /// measured in newtons (N).
-    pub driving_amplitude: [Force; 3],
-    /// The angular frequency of the driving force
-    /// in radians per second (rad/s).
-    pub driving_angular_frequency: AngularVelocity,
-    /// The phase shift of the driving force, which is a dimensionless value.
-    pub driving_phase: Angle,
+    pub driving: DrivingParameters,
 }
 
 impl Display for InputJson {
@@ -56,8 +74,8 @@ impl Display for InputJson {
             "\
 Total time steps: {}
 Time step size: {}
+Particle distances: ({}, {}, {}) {}
 Dimensions: {:?}
-Spring lengths: ({}, {}, {}) {}
 Spring constant: {}
 Damping: {}
 Driving parameters:
@@ -66,22 +84,23 @@ Driving parameters:
     Phase: {}",
             self.total_time_steps,
             self.time_step_size.into_format_args(second, Abbreviation),
-            self.dimensions,
-            self.spring_lengths[0].get::<length::meter>(),
-            self.spring_lengths[1].get::<length::meter>(),
-            self.spring_lengths[1].get::<length::meter>(),
+            self.particle_distances[0].get::<length::meter>(),
+            self.particle_distances[1].get::<length::meter>(),
+            self.particle_distances[1].get::<length::meter>(),
             length::Units::meter.abbreviation(),
+            self.dimensions,
             self.spring_constant
                 .into_format_args(newton_per_meter, Abbreviation),
             self.damping
                 .into_format_args(kilogram_per_second, Abbreviation),
-            self.driving_amplitude[0].get::<force::newton>(),
-            self.driving_amplitude[1].get::<force::newton>(),
-            self.driving_amplitude[2].get::<force::newton>(),
+            self.driving.amplitude[0].get::<force::newton>(),
+            self.driving.amplitude[1].get::<force::newton>(),
+            self.driving.amplitude[2].get::<force::newton>(),
             force::Units::newton.abbreviation(),
-            self.driving_angular_frequency
+            self.driving
+                .angular_frequency
                 .into_format_args(radian_per_second, Abbreviation),
-            self.driving_phase.into_format_args(radian, Abbreviation)
+            self.driving.phase.into_format_args(radian, Abbreviation)
         )
     }
 }

@@ -4,9 +4,12 @@ mod particle;
 mod vector3d;
 
 use std::{
-    cmp, env, fs,
+    cmp, env,
+    fmt::Write as _,
+    fs,
     io::Write,
     path::{Path, PathBuf},
+    result,
 };
 
 use uom::{
@@ -28,16 +31,54 @@ use crate::{
 /// but [`Path`]s can not be instantiated statically.
 static OUTPUT_DIR_STRING: &str = "output";
 
-/// Checks for various illogical input JSON settings.
-/// Corrects time step size, mass, and spring constant to [`f64::MIN_POSITIVE`]
-/// if 0.0.
-/// Sets time step size, mass, spring constant, damping, and spring lengths to
-/// their absolute values if negative.
+/// Checks for various illogical [input JSON] settings.
+/// Corrects [time step size], [mass], and [spring constant] to
+/// [`f64::MIN_POSITIVE`] if 0.0.
+/// Sets [time step size], [mass], [spring constant], [damping], and
+/// [particle distances] to their absolute values if negative.
 ///
-/// If any such corrections are made, return [`false`]. Else, return [`true`].
+/// If any such corrections are made, return [`false`].
+/// Else, return [`true`].
 ///
+/// [input JSON]: InputJson
+/// [time step size]: InputJson::time_step_size
+/// [mass]: InputJson::mass
+/// [spring constant]: InputJson::spring_constant
+/// [damping]: InputJson::damping
+/// [particle distances]: InputJson::particle_distances
 /// [`false`]: bool
 /// [`true`]: bool
+///
+/// # Examples
+///
+/// ```rust
+/// // Invalidated by the negative mass.
+/// assert_eq!(
+///     false,
+///     InputJson {
+///         total_time_steps: 120,
+///         time_step_size: Time::new::<second>(0.5),
+///         dimensions: [5, 5, 5],
+///         particle_distances: [
+///             Length::new::<meter>(1.0),
+///             Length::new::<meter>(1.0),
+///             Length::new::<meter>(1.0)
+///         ],
+///         mass: Mass::new::<kilogram>(-1.0),
+///         spring_constant: SurfaceTension::new::<newton_per_meter>(1.0),
+///         damping: MassRate::new::<kilogram_per_second>(1.0),
+///         driving: DrivingParameters {
+///             amplitude: [
+///                 Force::new::<newton>(1.0),
+///                 Force::new::<newton>(0.0),
+///                 Force::new::<newton>(0.0)
+///             ],
+///             angular_frequency: AngularVelocity::new::<radian_per_second>(1.0),
+///             phase: Angle::new::<radain>(0.0)
+///         }
+///     }
+/// );
+/// ```
 fn check_input_json(input_file_path: &Path, input_json: &mut InputJson) -> bool {
     let mut passed_all_checks = true;
 
@@ -92,25 +133,25 @@ Assuming a positive value of {} kg.",
         input_json.mass = -input_json.mass;
         passed_all_checks = false;
     }
-    if input_json.spring_lengths[0] < Length::ZERO
-        || input_json.spring_lengths[1] < Length::ZERO
-        || input_json.spring_lengths[2] < Length::ZERO
+    if input_json.particle_distances[0] < Length::ZERO
+        || input_json.particle_distances[1] < Length::ZERO
+        || input_json.particle_distances[2] < Length::ZERO
     {
         println!(
             "Warning: The springs lengths given in {input_file_path:?} are ({}, {}, {}) m, but they should be non-negative.",
-            input_json.spring_lengths[0].get::<meter>(),
-            input_json.spring_lengths[1].get::<meter>(),
-            input_json.spring_lengths[2].get::<meter>()
+            input_json.particle_distances[0].get::<meter>(),
+            input_json.particle_distances[1].get::<meter>(),
+            input_json.particle_distances[2].get::<meter>()
         );
 
-        input_json.spring_lengths[0] = (input_json.spring_lengths[0]).abs();
-        input_json.spring_lengths[1] = (input_json.spring_lengths[1]).abs();
-        input_json.spring_lengths[2] = (input_json.spring_lengths[2]).abs();
+        input_json.particle_distances[0] = (input_json.particle_distances[0]).abs();
+        input_json.particle_distances[1] = (input_json.particle_distances[1]).abs();
+        input_json.particle_distances[2] = (input_json.particle_distances[2]).abs();
         println!(
             "\nAssuming positive values of ({}, {}, {}) m.",
-            input_json.spring_lengths[0].get::<meter>(),
-            input_json.spring_lengths[1].get::<meter>(),
-            input_json.spring_lengths[2].get::<meter>()
+            input_json.particle_distances[0].get::<meter>(),
+            input_json.particle_distances[1].get::<meter>(),
+            input_json.particle_distances[2].get::<meter>()
         );
 
         passed_all_checks = false;
@@ -164,10 +205,10 @@ fn calculate_spring_force(
     } else {
         center_y - 1
     };
-    let start_z = if center_y == 0 {
-        center_y
+    let start_z = if center_z == 0 {
+        center_z
     } else {
-        center_y - 1
+        center_z - 1
     };
 
     // Prevent from going out of bounds.
@@ -209,40 +250,43 @@ fn calculate_spring_force(
 /// Updates the current [`acceleration`], [`velocity`], and [`position`] of the
 /// [`Particle`]s.
 ///
-/// If the value in `output_file` is [`None`], no output will be written.
-/// If it is [`Some`], output will written to the given [`File`].
+/// Returns a [`String`] of the [`Particle`]'s states before updating.
 ///
 /// [`acceleration`]: Particle::acceleration
 /// [`velocity`]: Particle::velocity
 /// [`position`]: Particle::position
-/// [`File`]: fs::File
 fn update_particles(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     input_json: &InputJson,
     current_time: Time,
-    mut output_file: Option<&mut fs::File>,
-) {
+) -> result::Result<String, String> {
     // Calculate the current force given by a sinusoidal driving force.
-    let driving_force = vector3d!(input_json.driving_amplitude)
-        * ((input_json.driving_angular_frequency * current_time) + input_json.driving_phase).cos();
+    let driving.force = vector3d!(input_json.driving.amplitude)
+        * ((input_json.driving.angular_frequency * current_time) + input_json.driving.phase).cos();
+
+    let mut output_string = String::new();
 
     // Apply forces to all particles.
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
+
                 // To avoid having to loop through again,
-                // output the `Particle` states to a file.
-                match output_file {
-                    Some(ref mut output_file) => {
-                        writeln!(output_file, "{}", particles[x][y][z]).unwrap_or_else(|_| {})
+                // output the `Particle` states to a `String`.
+                match writeln!(&mut output_string, "{}", particles[x][y][z]) {
+                    Ok(_) => {}
+                    Err(_) => {
+                        return Err(format!(
+                            "ERROR: Failed to write Particle {} at of indices ({x}, {y}, {z}) to the output string!",
+                            particles[x][y][z].id
+                        ));
                     }
-                    None => {}
                 }
 
                 let mut total_force = calculate_spring_force(
                     particles,
                     [x, y, z],
-                    input_json.spring_lengths,
+                    input_json.particle_distances,
                     input_json.spring_constant,
                 );
 
@@ -250,12 +294,22 @@ fn update_particles(
 
                 // Add the driving force to particles at the start end.
                 if x == 0 {
-                    total_force += driving_force;
+                    total_force += driving.force;
                 }
 
                 particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
             }
         }
+
+        // Blank line just to make the output easier to understand.
+        match writeln!(&mut output_string) {
+            Ok(_) => {}
+            Err(_) => {
+                return Err(format!(
+                    "ERROR: Failed to write newline after x-index {x} to the output string!"
+                ));
+            }
+        };
     }
 
     // Update position separately to prevent it from affecting spring force
@@ -271,6 +325,8 @@ fn update_particles(
             }
         }
     }
+
+    return Ok(output_string);
 }
 
 fn main() {
@@ -291,11 +347,11 @@ fn main() {
             .with_extension("txt")
             .file_name()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file_path:?} is an invalid OS string!")
+                panic!("ERROR: The input file path {input_file_path:?} is an invalid OS string!")
             })
             .to_str()
             .unwrap_or_else(|| {
-                panic!("ERROR: Input file name {input_file_path:?} is an invalid string!")
+                panic!("ERROR: The input file path {input_file_path:?} is an invalid string!")
             }),
     ]
     .iter()
@@ -303,19 +359,16 @@ fn main() {
 
     // Attempt to retreive the contents of the file.
     let file_contents = fs::read_to_string(input_file_path).unwrap_or_else(|_| {
-        panic!(
-            "ERROR: File `{input_file_path:?}` could not be read. Try checking if the file exists!"
-        )
+        panic!("ERROR: The input file {input_file_path:?} could not be read! Try checking if it exists.")
     });
 
     // Attempt to parse the file into usable data.
-    let mut input_json: InputJson= serde_json::from_str(&file_contents)
-        .unwrap_or_else(
-            |_| panic!(
-                "ERROR: File `{}` is malformatted. Check to make sure that it is properly formatted as given by the sample!",
-                &args[1]
-            )
-        );
+    let mut input_json: InputJson = serde_json::from_str(&file_contents).unwrap_or_else(|_| {
+        panic!(
+            "ERROR: The input file {input_file_path:?} is malformatted!
+Check to make sure that it is properly formatted as given in \"README.md\".",
+        )
+    });
 
     // Check for invalid values and correct them if found.
     if check_input_json(input_file_path, &mut input_json) {
@@ -329,18 +382,25 @@ fn main() {
         .open(&output_file_path)
         .unwrap_or_else(|_| {
             panic!(
-                "ERROR: Unable to create or open {output_file_path:?}!
-Try checking if the output/ directory exists."
+                "ERROR: Unable to create or open the output file {output_file_path:?}!
+Try checking if the \"output/\" directory exists."
             );
         });
+    // Clear the file before writing to it.
+    // For some reason, opening a file with truncate() seems to result in an error.
+    output_file.set_len(0).unwrap_or_else(|_| {
+        println!("Warning: Failed to clear the output file {output_file_path:?}.")
+    });
+    // Add information about the input JSON file to the top.
     writeln!(
         output_file,
         "\
-Input JSON: {}
-{}",
-        &args[1], input_json
+Input JSON: {input_file_path:?}
+{input_json}\n"
     )
-    .unwrap_or_else(|_| println!("Warning: Failed to write to {output_file_path:?}."));
+    .unwrap_or_else(|_| {
+        println!("Warning: Failed to write to the output file {output_file_path:?}.")
+    });
 
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
@@ -373,17 +433,20 @@ Input JSON: {}
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
-            println!("WARNING: Failed to write to {output_file_path:?}.");
+            println!("Warning: Failed to write to the output file {output_file_path:?}.");
         });
 
         current_time += input_json.time_step_size;
 
         // Calculate and print the particles.
-        update_particles(
-            &mut particles,
-            &input_json,
-            current_time,
-            Some(&mut output_file),
-        );
+        match update_particles(&mut particles, &input_json, current_time) {
+            Ok(output_string) => write!(output_file, "{output_string}").unwrap_or_else(|_| {
+                println!(
+                    "Warning: Failed to write time step {i} (t = {}) into the output file {output_file_path:?}.",
+                    current_time.into_format_args(second, Abbreviation)
+                );
+            }),
+            Err(error) => panic!("{error}"),
+        };
     }
 }
