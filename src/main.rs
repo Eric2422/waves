@@ -155,7 +155,7 @@ Assuming a positive value of {} kg.",
         input_json.particle_distances[1] = (input_json.particle_distances[1]).abs();
         input_json.particle_distances[2] = (input_json.particle_distances[2]).abs();
         println!(
-            "\nAssuming positive values of ({}, {}, {}) m.",
+            "Assuming positive values of ({}, {}, {}) m.",
             input_json.particle_distances[0].get::<meter>(),
             input_json.particle_distances[1].get::<meter>(),
             input_json.particle_distances[2].get::<meter>()
@@ -408,7 +408,8 @@ Try checking if the \"output/\" directory exists."
         output_file,
         "\
 Input JSON: {input_file_path:?}
-{input_json}\n"
+{input_json}
+"
     )
     .unwrap_or_else(|_| {
         println!("Warning: Failed to write to the output file {output_file_path:?}.")
@@ -441,7 +442,8 @@ Input JSON: {input_file_path:?}
     for i in 0..=input_json.total_time_steps {
         writeln!(
             output_file,
-            "\nTime step {i}, t = {}",
+            "
+Time step {i}, t = {}",
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
