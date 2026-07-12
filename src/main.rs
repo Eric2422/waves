@@ -338,7 +338,7 @@ fn update_particles(
         }
     }
 
-    return Ok(output_string);
+    Ok(output_string)
 }
 
 fn main() {
