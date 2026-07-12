@@ -212,10 +212,10 @@ fn calculate_spring_force(
     } else {
         center_y - 1
     };
-    let start_z = if center_y == 0 {
-        center_y
+    let start_z = if center_z == 0 {
+        center_z
     } else {
-        center_y - 1
+        center_z - 1
     };
 
     // Prevent from going out of bounds.
@@ -241,15 +241,11 @@ fn calculate_spring_force(
                         (z as f64 - center_z as f64) * spring_lengths[2].value
                     )
                     .get_magnitude();
-                    
-                    let force = -spring_constant.value
-                        * (distance_vector.get_magnitude() - resting_length)
-                        * distance_vector.get_normalized();
-                    
-                    println!("Force between {} and {}: {force} N", center_particle.id, particles[x][y][z].id);
 
                     // Apply Hooke's Law.
-                    spring_force += force;
+                    spring_force += -spring_constant.value
+                        * (distance_vector.get_magnitude() - resting_length)
+                        * distance_vector.get_normalized();
                 }
             }
         }
@@ -286,6 +282,7 @@ fn update_particles(
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
+
                 // To avoid having to loop through again,
                 // output the `Particle` states to a `String`.
                 match writeln!(&mut output_string, "{}", particles[x][y][z]) {
