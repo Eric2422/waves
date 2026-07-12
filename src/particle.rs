@@ -1,12 +1,19 @@
 //! Module to represent [`Particle`]s in a longitudinal wave.
 
-use std::collections::HashMap;
-use std::fmt::{Debug, Display};
-use std::hash::Hash;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{
+    collections::HashSet,
+    fmt::{Debug, Display},
+    hash::Hash,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
-use crate::vector_3d;
-use crate::vector3d::Vector3d;
+use uom::{
+    ConstZero,
+    fmt::DisplayStyle::Abbreviation,
+    si::{f64::Mass, length::meter, mass::kilogram},
+};
+
+use crate::{dimension, vector3d, vector3d::Vector3d};
 
 /// Counter for the [`id`] property of the [`Particle`] class.
 ///
@@ -16,9 +23,9 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 /// A single particle in a longitudinal wave,
 /// each connected to other particles by linear springs.
 pub struct Particle {
-    id: usize,
+    pub id: usize,
     /// The mass of this particle in kilograms (kg).
-    pub mass: f64,
+    pub mass: Mass,
     /// The position of this particle as a 3D vector in meters (m).
     pub position: Vector3d,
     /// The velocity of this particle as a 3D vector in meters per second (m/s).
@@ -26,9 +33,8 @@ pub struct Particle {
     /// The acceleration of this particle as a 3D vector
     /// in meters per second squared (m/s²).
     pub acceleration: Vector3d,
-    /// The particles that this particle is linked to by springs
-    /// mapped onto the respective spring constants in newtons per meters (N/m).
-    linked_particles: HashMap<Particle, f64>,
+    /// The springs attached to this [`Particle`].
+    attached_springs: HashSet<Spring>,
 }
 
 impl Clone for Particle {
@@ -43,7 +49,7 @@ impl Clone for Particle {
             position: self.position.clone(),
             velocity: self.velocity.clone(),
             acceleration: self.acceleration.clone(),
-            linked_particles: self.linked_particles.clone(),
+            attached_springs: self.attached_springs.clone(),
         }
     }
 }
@@ -56,7 +62,7 @@ impl Debug for Particle {
             .field("position", &self.position)
             .field("velocity", &self.velocity)
             .field("acceleration", &self.acceleration)
-            .field("linked_particles", &self.linked_particles)
+            .field("attached_springs", &self.attached_springs)
             .finish()
     }
 }
@@ -65,8 +71,12 @@ impl Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Particle {}: m = {} kg, r = {} m, v = {} m/s, a = {} m/s²",
-            self.id, self.mass, self.position, self.velocity, self.acceleration
+            "Particle {}: m = {}, r = {} m, v = {} m/s, a = {} m/s²",
+            self.id,
+            self.mass.into_format_args(kilogram, Abbreviation),
+            self.position,
+            self.velocity,
+            self.acceleration
         )
     }
 }
@@ -99,7 +109,7 @@ impl Particle {
 
 /// A builder for the [`Particle`] class,
 /// allowing for a way to set the [`mass`], [`position`], [`velocity`],
-/// [`acceleration`], and [`linked_particles`].
+/// [`acceleration`], and [`attached_springs`].
 ///
 /// Note that since [`id`]s are predetermined in [`ParticleBuilder::build()`],
 /// the builder does not come with a method to set the [`id`].
@@ -108,33 +118,33 @@ impl Particle {
 /// [`position`]: Particle::position
 /// [`velocity`]: Particle::velocity
 /// [`acceleration`]: Particle::acceleration
-/// [`linked_particles`]: Particle::linked_particles
+/// [`attached_springs`]: Particle::attached_springs
 /// [`id`]: Particle::id
 #[derive(Default)]
 pub struct ParticleBuilder {
-    mass: f64,
+    mass: Mass,
     position: Vector3d,
     velocity: Vector3d,
-    linked_particles: HashMap<Particle, f64>,
+    attached_springs: HashSet<Spring>,
 }
 
 impl ParticleBuilder {
     /// Instantiate and return a new [`ParticleBuilder`] with a mass of 1.0 kg,
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
-    /// acceleration of <0.0, 0.0, 0.0> m/s², and no linked [`Particle`]s.
+    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
     pub fn new_1kg() -> ParticleBuilder {
-        ParticleBuilder::new(1.0)
+        ParticleBuilder::new(Mass::new::<kilogram>(1.0))
     }
 
     /// Instantiate and return a new [`ParticleBuilder`] with a given mass,
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
-    /// acceleration of <0.0, 0.0, 0.0> m/s², and no linked [`Particle`]s.
-    pub fn new(mass: f64) -> ParticleBuilder {
+    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
+    pub fn new(mass: Mass) -> ParticleBuilder {
         ParticleBuilder {
             mass,
             position: Vector3d::zero(),
             velocity: Vector3d::zero(),
-            linked_particles: HashMap::new(),
+            attached_springs: HashSet::new(),
         }
     }
 
@@ -155,8 +165,8 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`mass`]: Particle::mass
-    pub fn set_mass(mut self, mass: f64) -> ParticleBuilder {
-        if mass > 0.0 {
+    pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder {
+        if mass > Mass::ZERO {
             self.mass = mass;
         };
         self
@@ -178,7 +188,7 @@ impl ParticleBuilder {
     ///
     /// [`position`]: Particle::position
     pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.position = vector_3d!(x, y, z);
+        self.position = vector3d!(x, y, z);
         self
     }
 
@@ -199,15 +209,15 @@ impl ParticleBuilder {
     ///
     /// [`velocity`]: Particle::velocity
     pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.velocity = vector_3d!(x, y, z);
+        self.velocity = vector3d!(x, y, z);
         self
     }
 
     /// Link this [`Particle`] to another [`Particle`]
     /// with a spring of constant `spring_constant` in newtons per meter (N/m),
-    /// updating [`linked_masses`] accordingly.
+    /// updating [`attached_springs`] accordingly.
     ///
-    /// If the given [`Particle`] already exists in [`linked_particles`],
+    /// If the given [`Particle`] already exists in [`attached_springs`],
     /// the pre-existing spring constant will be replaced with the new one.
     ///
     /// Can be chained with other setter methods.
@@ -222,19 +232,15 @@ impl ParticleBuilder {
     ///     .build();
     /// ```
     ///
-    /// [`linked_particles`]: Particle::linked_particles
-    pub fn add_linked_particle(
-        mut self,
-        particle: Particle,
-        spring_constant: f64,
-    ) -> ParticleBuilder {
-        self.linked_particles.insert(particle, spring_constant);
+    /// [`attached_springs`]: Particle::attached_springs
+    pub fn attach_spring(mut self, spring: Spring) -> ParticleBuilder {
+        self.attached_springs.insert(spring);
         self
     }
 
     /// Attempts to instantiate a new [`Particle`] object
     /// using the current values of [`mass`], [`position`], [`velocity`],
-    /// [`acceleration`], and [`linked_particles`].
+    /// [`acceleration`], and [`attached_springs`].
     ///
     /// The [`id`] property will be assigned from the value stored in
     /// [`PARTICLE_COUNTER`],
@@ -246,7 +252,7 @@ impl ParticleBuilder {
     /// [`position`]: Particle::position
     /// [`velocity`]: Particle::velocity
     /// [`acceleration`]: Particle::acceleration
-    /// [`linked_particles`]: Particle::linked_particles
+    /// [`attached_springs`]: Particle::attached_springs
     pub fn build(self) -> Particle {
         Particle {
             id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
@@ -254,7 +260,30 @@ impl ParticleBuilder {
             position: self.position,
             velocity: self.velocity,
             acceleration: Vector3d::zero(),
-            linked_particles: self.linked_particles,
+            attached_springs: self.attached_springs,
         }
     }
 }
+
+
+/// A spring of a given stiffness connecting two [`Particle`]s.
+#[derive(Clone, Debug)]
+pub struct Spring {
+    particles: [Particle; 2],
+    spring_constant: dimension::SpringConstant,
+    resting_length: meter,
+}
+
+impl Hash for Spring {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.particles.hash(state);
+    }
+}
+
+impl PartialEq for Spring {
+    fn eq(&self, other: &Self) -> bool {
+        self.particles == other.particles
+    }
+}
+
+impl Eq for Spring {}
