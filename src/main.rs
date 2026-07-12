@@ -212,10 +212,10 @@ fn calculate_spring_force(
     } else {
         center_y - 1
     };
-    let start_z = if center_y == 0 {
-        center_y
+    let start_z = if center_z == 0 {
+        center_z
     } else {
-        center_y - 1
+        center_z - 1
     };
 
     // Prevent from going out of bounds.
@@ -282,6 +282,7 @@ fn update_particles(
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
+
                 // To avoid having to loop through again,
                 // output the `Particle` states to a `String`.
                 match writeln!(&mut output_string, "{}", particles[x][y][z]) {
