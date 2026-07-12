@@ -4,6 +4,10 @@ A wave simulator programmed in Rust.
 
 Waves are simulated as equidistant particles connected by linear springs.
 
+## Table of Contents
+
+- [Input](#input)
+
 ## Input
 
 The input files are JSON files in the [`input/`] directory.
