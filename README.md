@@ -36,6 +36,8 @@ The driving angular frequency is in radians per second ($\mathrm{rad/s}$).
 
 The driving phase is in radians ($\mathrm{rad}$).
 
+The initial velocity is in meters per second ($\mathrm{m/s}$).
+
 ```json
 {
     "total_time_steps": 120,
@@ -49,7 +51,8 @@ The driving phase is in radians ($\mathrm{rad}$).
         "amplitude": [1.0, 0.0, 0.0],
         "angular_frequency": 1.0,
         "phase": 0.0
-    }
+    },
+    "initial_velocity": [0.0, 0.0, 0.0]
 }
 ```
 
