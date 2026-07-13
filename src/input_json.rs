@@ -64,6 +64,12 @@ pub struct InputJson {
     ///
     /// [`Spring`]: crate::particle::Spring
     pub damping: dimension::ViscousDamping,
+    /// The [amplitude], [angular frequency], and [phase] of the driving as
+    /// described in greater detail under [`DrivingParameters`].
+    ///
+    /// [amplitude]: DrivingParameters::amplitude
+    /// [angular frequency]: DrivingParameters::angular_frequency
+    /// [phase]: DrivingParameters::phase
     pub driving: DrivingParameters,
 }
 
