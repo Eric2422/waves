@@ -71,7 +71,7 @@ impl Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Particle {}: m = {}, r = {} m, v = {} m/s, a = {} m/s²",
+            "Particle {}: m = {}; r = {} m; v = {} m/s; a = {} m/s²",
             self.id,
             self.mass.into_format_args(kilogram, Abbreviation),
             self.position,
