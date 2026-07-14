@@ -8,7 +8,7 @@ use uom::{
     si::{
         angle::radian,
         angular_velocity::radian_per_second,
-        f64::{Angle, AngularVelocity, Force, Length, Mass, Time},
+        f64::{Angle, AngularVelocity, Force, Length, Mass, Time, Velocity},
         force, length,
         mass_rate::kilogram_per_second,
         surface_tension::newton_per_meter,
@@ -71,6 +71,12 @@ pub struct InputJson {
     /// [angular frequency]: DrivingParameters::angular_frequency
     /// [phase]: DrivingParameters::phase
     pub driving: DrivingParameters,
+    /// The initial velocity of the *driven* [particles] only as a [3D vector]
+    /// measured in meters per second (m/s).
+    ///
+    /// [particles]: crate::particle::Particle
+    /// [3D vector]: crate::vector3d::Vector3d
+    pub initial_velocity: [Velocity; 3],
 }
 
 impl Display for InputJson {

@@ -7,6 +7,5 @@
         "serde",
         "typenum",
         "zmij"
-    ],
-    "C_Cpp.default.compilerPath": "C:/msys64/mingw64/bin/g++.exe"
+    ]
 }
