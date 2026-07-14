@@ -282,7 +282,6 @@ fn update_particles(
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
-
                 // To avoid having to loop through again,
                 // output the `Particle` states to a `String`.
                 match writeln!(&mut output_string, "{}", particles[x][y][z]) {
@@ -424,15 +423,34 @@ Input JSON: {input_file_path:?}
             particles[x].push(Vec::new());
 
             for z in 0..input_json.dimensions[2] {
-                particles[x][y].push(
-                    ParticleBuilder::new(input_json.mass)
-                        .set_position(
-                            (x as f64) * input_json.particle_distances[0].value,
-                            (y as f64) * input_json.particle_distances[1].value,
-                            (z as f64) * input_json.particle_distances[2].value,
-                        )
-                        .build(),
-                );
+                // Only apply initial velocity to the first x-layer,
+                // i.e., the driven particles.
+                if x == 0 {
+                    particles[x][y].push(
+                        ParticleBuilder::new(input_json.mass)
+                            .set_position(
+                                (x as f64) * input_json.particle_distances[0].value,
+                                (y as f64) * input_json.particle_distances[1].value,
+                                (z as f64) * input_json.particle_distances[2].value,
+                            )
+                            .set_velocity(
+                                input_json.initial_velocity[0].value,
+                                input_json.initial_velocity[1].value,
+                                input_json.initial_velocity[2].value,
+                            )
+                            .build(),
+                    );
+                } else {
+                    particles[x][y].push(
+                        ParticleBuilder::new(input_json.mass)
+                            .set_position(
+                                (x as f64) * input_json.particle_distances[0].value,
+                                (y as f64) * input_json.particle_distances[1].value,
+                                (z as f64) * input_json.particle_distances[2].value,
+                            )
+                            .build(),
+                    );
+                }
             }
         }
     }
