@@ -288,7 +288,7 @@ fn update_particles(
                     Ok(_) => {}
                     Err(_) => {
                         return Err(format!(
-                            "ERROR: Failed to write Particle {} at of indices ({x}, {y}, {z}) to the output string!",
+                            "ERROR: Failed to write Particle {} at indices ({x}, {y}, {z}) to the output string!",
                             particles[x][y][z].id
                         ));
                     }
@@ -345,7 +345,7 @@ fn main() {
 
     if args.len() < 2 {
         panic!(
-            "ERROR: No input file provided. Usage: `./target/debug/longitudinal_waves!exe input/<file name>`"
+            "ERROR: No input file provided. Usage: `./target/debug/longitudinal_waves!exe input/<file name>`."
         );
     }
 
@@ -377,7 +377,7 @@ fn main() {
     let mut input_json: InputJson = serde_json::from_str(&file_contents).unwrap_or_else(|_| {
         panic!(
             "ERROR: The input file {input_file_path:?} is malformatted!
-Check to make sure that it is properly formatted as given in \"README.md\".",
+Try checking that it is properly formatted as given in \"README.md\".",
         )
     });
 
