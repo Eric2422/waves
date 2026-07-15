@@ -162,10 +162,20 @@ impl ParticleBuilder {
     /// # Example
     ///
     /// ```rust
+    /// # use uom::si::f64
+    ///
     /// let particle = ParticleBuilder::new()
-    ///     .set_mass(2.0)
-    ///     .set_position(1.0, 1.0, 1.0)
-    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    ///     .set_position(
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///     )
+    ///     .set_velocity(
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///     )
     ///     .build();
     /// ```
     ///
@@ -184,10 +194,20 @@ impl ParticleBuilder {
     /// # Example
     ///
     /// ```rust
+    /// # use uom::si::f64
+    ///
     /// let particle = ParticleBuilder::new()
-    ///     .set_mass(2.0)
-    ///     .set_position(1.0, 1.0, 1.0)
-    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    ///     .set_position(
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///     )
+    ///     .set_velocity(
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///     )
     ///     .build();
     /// ```
     ///
@@ -205,10 +225,20 @@ impl ParticleBuilder {
     /// # Example
     ///
     /// ```rust
+    /// # use uom::si::f64
+    ///
     /// let particle = ParticleBuilder::new()
-    ///     .set_mass(2.0)
-    ///     .set_position(1.0, 1.0, 1.0)
-    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    ///     .set_position(
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///     )
+    ///     .set_velocity(
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///     )
     ///     .build();
     /// ```
     ///
@@ -223,21 +253,33 @@ impl ParticleBuilder {
     }
 
     /// Link this [`Particle`] to another [`Particle`]
-    /// with a spring of constant `spring_constant` in newtons per meter (N/m),
-    /// updating [`attached_springs`] accordingly.
+    /// with a [`Spring`] of constant `spring_constant` in [newtons per meter]
+    /// (N/m), updating [`attached_springs`] accordingly.
     ///
     /// If the given [`Particle`] already exists in [`attached_springs`],
     /// the pre-existing spring constant will be replaced with the new one.
     ///
     /// Can be chained with other setter methods.
     ///
+    /// [newtons per meter]: uom::si::surface_tension::newton_per_meter
+    ///
     /// # Example
     ///
     /// ```rust
+    /// # use uom::si::f64
+    ///
     /// let particle = ParticleBuilder::new()
-    ///     .set_mass(2.0)
-    ///     .set_position(1.0, 1.0, 1.0)
-    ///     .set_velocity(0.5, 0.5, 0.5)
+    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    ///     .set_position(
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///     )
+    ///     .set_velocity(
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///     )
     ///     .build();
     /// ```
     ///
@@ -256,12 +298,32 @@ impl ParticleBuilder {
     /// which increments by one (1) every time this function is called.
     /// Thus, no two [`Particle`]s will have an identical [`id`].
     ///
-    ///
     /// [`mass`]: Particle::mass
     /// [`position`]: Particle::position
     /// [`velocity`]: Particle::velocity
     /// [`acceleration`]: Particle::acceleration
     /// [`attached_springs`]: Particle::attached_springs
+    /// [`id`]: Particle::id
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use uom::si::f64
+    ///
+    /// let particle = ParticleBuilder::new()
+    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    ///     .set_position(
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///     )
+    ///     .set_velocity(
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///     )
+    ///     .build();
+    /// ```
     pub fn build(self) -> Particle {
         Particle {
             id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
