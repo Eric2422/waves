@@ -16,7 +16,9 @@ use uom::{
     ConstZero,
     fmt::DisplayStyle::Abbreviation,
     si::{
+        angle::radian,
         f64::{Length, Mass, MassRate, Time},
+        force::newton,
         length::meter,
         mass::kilogram,
         mass_rate::kilogram_per_second,
@@ -236,14 +238,14 @@ fn calculate_spring_force(
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the resting length.
                     let resting_length = vector3d!(
-                        (x as f64 - center_x as f64) * spring_lengths[0].value,
-                        (y as f64 - center_y as f64) * spring_lengths[1].value,
-                        (z as f64 - center_z as f64) * spring_lengths[2].value
+                        (x as f64 - center_x as f64) * spring_lengths[0].get::<meter>(),
+                        (y as f64 - center_y as f64) * spring_lengths[1].get::<meter>(),
+                        (z as f64 - center_z as f64) * spring_lengths[2].get::<meter>()
                     )
                     .get_magnitude();
 
                     // Apply Hooke's Law.
-                    spring_force += -spring_constant.value
+                    spring_force += -spring_constant.get::<newton_per_meter>()
                         * (distance_vector.get_magnitude() - resting_length)
                         * distance_vector.get_normalized();
                 }
@@ -269,12 +271,12 @@ fn update_particles(
 ) -> result::Result<String, String> {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
-        input_json.driving.amplitude[0].value,
-        input_json.driving.amplitude[1].value,
-        input_json.driving.amplitude[2].value
+        input_json.driving.amplitude[0].get::<newton>(),
+        input_json.driving.amplitude[1].get::<newton>(),
+        input_json.driving.amplitude[2].get::<newton>()
     ) * ((input_json.driving.angular_frequency * current_time).value
-        + input_json.driving.phase.value)
-        .cos();
+        + input_json.driving.phase.get::<radian>())
+    .cos();
 
     let mut output_string = String::new();
 
@@ -301,14 +303,16 @@ fn update_particles(
                     input_json.spring_constant,
                 );
 
-                total_force -= input_json.damping.value * particles[x][y][z].velocity;
+                total_force -=
+                    input_json.damping.get::<kilogram_per_second>() * particles[x][y][z].velocity;
 
                 // Add the driving force to particles at the start end.
                 if x == 0 {
                     total_force += driving_force;
                 }
 
-                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
+                particles[x][y][z].acceleration =
+                    total_force / particles[x][y][z].mass.get::<kilogram>();
             }
         }
 
@@ -329,10 +333,11 @@ fn update_particles(
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
                 let acceleration = particles[x][y][z].acceleration;
-                particles[x][y][z].velocity += acceleration * input_json.time_step_size.value;
+                particles[x][y][z].velocity +=
+                    acceleration * input_json.time_step_size.get::<second>();
 
                 let velocity = particles[x][y][z].velocity;
-                particles[x][y][z].position += velocity * input_json.time_step_size.value;
+                particles[x][y][z].position += velocity * input_json.time_step_size.get::<second>();
             }
         }
     }
