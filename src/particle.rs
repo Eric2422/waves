@@ -10,7 +10,12 @@ use std::{
 use uom::{
     ConstZero,
     fmt::DisplayStyle::Abbreviation,
-    si::{f64::Mass, length::meter, mass::kilogram},
+    si::{
+        f64::{Length, Mass, Velocity},
+        length::meter,
+        mass::kilogram,
+        velocity::meter_per_second,
+    },
 };
 
 use crate::{dimension, vector3d, vector3d::Vector3d};
@@ -187,8 +192,8 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`position`]: Particle::position
-    pub fn set_position(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.position = vector3d!(x, y, z);
+    pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder {
+        self.position = vector3d!(x.get::<meter>(), y.get::<meter>(), z.get::<meter>());
         self
     }
 
@@ -208,8 +213,12 @@ impl ParticleBuilder {
     /// ```
     ///
     /// [`velocity`]: Particle::velocity
-    pub fn set_velocity(mut self, x: f64, y: f64, z: f64) -> ParticleBuilder {
-        self.velocity = vector3d!(x, y, z);
+    pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder {
+        self.velocity = vector3d!(
+            x.get::<meter_per_second>(),
+            y.get::<meter_per_second>(),
+            z.get::<meter_per_second>()
+        );
         self
     }
 
