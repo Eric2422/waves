@@ -16,7 +16,9 @@ use uom::{
     ConstZero,
     fmt::DisplayStyle::Abbreviation,
     si::{
+        angle::radian,
         f64::{Length, Mass, MassRate, Time},
+        force::newton,
         length::meter,
         mass::kilogram,
         mass_rate::kilogram_per_second,
@@ -155,7 +157,7 @@ Assuming a positive value of {} kg.",
         input_json.particle_distances[1] = (input_json.particle_distances[1]).abs();
         input_json.particle_distances[2] = (input_json.particle_distances[2]).abs();
         println!(
-            "\nAssuming positive values of ({}, {}, {}) m.",
+            "Assuming positive values of ({}, {}, {}) m.",
             input_json.particle_distances[0].get::<meter>(),
             input_json.particle_distances[1].get::<meter>(),
             input_json.particle_distances[2].get::<meter>()
@@ -236,14 +238,14 @@ fn calculate_spring_force(
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the resting length.
                     let resting_length = vector3d!(
-                        (x as f64 - center_x as f64) * spring_lengths[0].value,
-                        (y as f64 - center_y as f64) * spring_lengths[1].value,
-                        (z as f64 - center_z as f64) * spring_lengths[2].value
+                        (x as f64 - center_x as f64) * spring_lengths[0].get::<meter>(),
+                        (y as f64 - center_y as f64) * spring_lengths[1].get::<meter>(),
+                        (z as f64 - center_z as f64) * spring_lengths[2].get::<meter>()
                     )
                     .get_magnitude();
 
                     // Apply Hooke's Law.
-                    spring_force += -spring_constant.value
+                    spring_force += -spring_constant.get::<newton_per_meter>()
                         * (distance_vector.get_magnitude() - resting_length)
                         * distance_vector.get_normalized();
                 }
@@ -269,12 +271,12 @@ fn update_particles(
 ) -> result::Result<String, String> {
     // Calculate the current force given by a sinusoidal driving force.
     let driving_force = vector3d!(
-        input_json.driving.amplitude[0].value,
-        input_json.driving.amplitude[1].value,
-        input_json.driving.amplitude[2].value
+        input_json.driving.amplitude[0].get::<newton>(),
+        input_json.driving.amplitude[1].get::<newton>(),
+        input_json.driving.amplitude[2].get::<newton>()
     ) * ((input_json.driving.angular_frequency * current_time).value
-        + input_json.driving.phase.value)
-        .cos();
+        + input_json.driving.phase.get::<radian>())
+    .cos();
 
     let mut output_string = String::new();
 
@@ -282,14 +284,13 @@ fn update_particles(
     for x in 0..particles.len() {
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
-
                 // To avoid having to loop through again,
                 // output the `Particle` states to a `String`.
                 match writeln!(&mut output_string, "{}", particles[x][y][z]) {
                     Ok(_) => {}
                     Err(_) => {
                         return Err(format!(
-                            "ERROR: Failed to write Particle {} at of indices ({x}, {y}, {z}) to the output string!",
+                            "ERROR: Failed to write Particle {} at indices ({x}, {y}, {z}) to the output string!",
                             particles[x][y][z].id
                         ));
                     }
@@ -302,14 +303,16 @@ fn update_particles(
                     input_json.spring_constant,
                 );
 
-                total_force -= input_json.damping.value * particles[x][y][z].velocity;
+                total_force -=
+                    input_json.damping.get::<kilogram_per_second>() * particles[x][y][z].velocity;
 
                 // Add the driving force to particles at the start end.
                 if x == 0 {
                     total_force += driving_force;
                 }
 
-                particles[x][y][z].acceleration = total_force / particles[x][y][z].mass.value;
+                particles[x][y][z].acceleration =
+                    total_force / particles[x][y][z].mass.get::<kilogram>();
             }
         }
 
@@ -330,15 +333,16 @@ fn update_particles(
         for y in 0..particles[x].len() {
             for z in 0..particles[x][y].len() {
                 let acceleration = particles[x][y][z].acceleration;
-                particles[x][y][z].velocity += acceleration * input_json.time_step_size.value;
+                particles[x][y][z].velocity +=
+                    acceleration * input_json.time_step_size.get::<second>();
 
                 let velocity = particles[x][y][z].velocity;
-                particles[x][y][z].position += velocity * input_json.time_step_size.value;
+                particles[x][y][z].position += velocity * input_json.time_step_size.get::<second>();
             }
         }
     }
 
-    return Ok(output_string);
+    Ok(output_string)
 }
 
 fn main() {
@@ -346,7 +350,7 @@ fn main() {
 
     if args.len() < 2 {
         panic!(
-            "ERROR: No input file provided. Usage: `./target/debug/longitudinal_waves!exe input/<file name>`"
+            "ERROR: No input file provided. Usage: `./target/debug/longitudinal_waves!exe input/<file name>`."
         );
     }
 
@@ -378,7 +382,7 @@ fn main() {
     let mut input_json: InputJson = serde_json::from_str(&file_contents).unwrap_or_else(|_| {
         panic!(
             "ERROR: The input file {input_file_path:?} is malformatted!
-Check to make sure that it is properly formatted as given in \"README.md\".",
+Try checking that it is properly formatted as given in \"README.md\".",
         )
     });
 
@@ -408,7 +412,8 @@ Try checking if the \"output/\" directory exists."
         output_file,
         "\
 Input JSON: {input_file_path:?}
-{input_json}\n"
+{input_json}
+"
     )
     .unwrap_or_else(|_| {
         println!("Warning: Failed to write to the output file {output_file_path:?}.")
@@ -423,15 +428,30 @@ Input JSON: {input_file_path:?}
             particles[x].push(Vec::new());
 
             for z in 0..input_json.dimensions[2] {
-                particles[x][y].push(
+                // Only apply initial velocity to the first x-layer,
+                // i.e., the driven particles.
+                particles[x][y].push(if x == 0 {
                     ParticleBuilder::new(input_json.mass)
                         .set_position(
-                            (x as f64) * input_json.particle_distances[0].value,
-                            (y as f64) * input_json.particle_distances[1].value,
-                            (z as f64) * input_json.particle_distances[2].value,
+                            (x as f64) * input_json.particle_distances[0],
+                            (y as f64) * input_json.particle_distances[1],
+                            (z as f64) * input_json.particle_distances[2],
                         )
-                        .build(),
-                );
+                        .set_velocity(
+                            input_json.initial_velocity[0],
+                            input_json.initial_velocity[1],
+                            input_json.initial_velocity[2],
+                        )
+                        .build()
+                } else {
+                    ParticleBuilder::new(input_json.mass)
+                        .set_position(
+                            (x as f64) * input_json.particle_distances[0],
+                            (y as f64) * input_json.particle_distances[1],
+                            (z as f64) * input_json.particle_distances[2],
+                        )
+                        .build()
+                });
             }
         }
     }
@@ -441,7 +461,8 @@ Input JSON: {input_file_path:?}
     for i in 0..=input_json.total_time_steps {
         writeln!(
             output_file,
-            "\nTime step {i}, t = {}",
+            "
+Time step {i}, t = {}",
             current_time.into_format_args(second, Abbreviation)
         )
         .unwrap_or_else(|_| {
