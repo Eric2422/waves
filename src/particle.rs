@@ -38,6 +38,8 @@ pub struct Particle {
     /// The acceleration of this particle as a 3D vector
     /// in meters per second squared (m/s²).
     pub acceleration: Vector3d,
+    /// Whether this particle should be considered fixed, e.g., a wall.
+    fixed: bool,
     /// The springs attached to this [`Particle`].
     attached_springs: HashSet<Spring>,
 }
@@ -54,6 +56,7 @@ impl Clone for Particle {
             position: self.position.clone(),
             velocity: self.velocity.clone(),
             acceleration: self.acceleration.clone(),
+            fixed: self.fixed.clone(),
             attached_springs: self.attached_springs.clone(),
         }
     }
@@ -67,6 +70,7 @@ impl Debug for Particle {
             .field("position", &self.position)
             .field("velocity", &self.velocity)
             .field("acceleration", &self.acceleration)
+            .field("fixed", &self.fixed)
             .field("attached_springs", &self.attached_springs)
             .finish()
     }
@@ -76,7 +80,12 @@ impl Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Particle {}: m = {}; r = {} m; v = {} m/s; a = {} m/s²",
+            "{} {}: m = {}; r = {} m; v = {} m/s; a = {} m/s²",
+            if self.fixed {
+                "Fixed particle"
+            } else {
+                "Particle"
+            },
             self.id,
             self.mass.into_format_args(kilogram, Abbreviation),
             self.position,
@@ -331,6 +340,7 @@ impl ParticleBuilder {
             position: self.position,
             velocity: self.velocity,
             acceleration: Vector3d::zero(),
+            fixed: false,
             attached_springs: self.attached_springs,
         }
     }
