@@ -29,17 +29,20 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 /// A single particle in a longitudinal wave,
 /// each connected to other particles by linear springs.
 pub struct Particle {
+    /// A unique unsigned integer identifying this [`Particle`].
     pub id: usize,
-    /// The mass of this particle in kilograms (kg).
+    /// The mass of this [`Particle`] in kilograms (kg).
     pub mass: Mass,
-    /// The position of this particle as a 3D vector in meters (m).
+    /// The position of this [`Particle`] as a 3D vector in meters (m).
     pub position: Vector3d,
-    /// The velocity of this particle as a 3D vector in meters per second (m/s).
+    /// The velocity of this [`Particle`] as a 3D vector in meters per second (m/s).
     pub velocity: Vector3d,
     /// The acceleration of this particle as a 3D vector
     /// in meters per second squared (m/s²).
     pub acceleration: Vector3d,
-    /// Whether this particle should be considered fixed, e.g., a wall.
+    /// Whether this [`Particle`] should be considered fixed, e.g., a wall.
+    /// When fixed, the position should never change,
+    /// and the velocity and acceleration should always be 0.
     fixed: bool,
     /// The springs attached to this [`Particle`].
     attached_springs: HashSet<Rc<Spring>>,
@@ -123,11 +126,11 @@ impl Particle {
 }
 
 /// A builder for the [`Particle`] class,
-/// allowing for a way to set the [`mass`], [`position`], [`velocity`],
+/// allowing for a way to Sets the [`mass`], [`position`], [`velocity`],
 /// [`acceleration`], and [`attached_springs`].
 ///
 /// Note that since [`id`]s are predetermined in [`ParticleBuilder::build()`],
-/// the builder does not come with a method to set the [`id`].
+/// the builder does not come with a method to Sets the [`id`].
 ///
 /// [`mass`]: Particle::mass
 /// [`position`]: Particle::position
@@ -140,18 +143,12 @@ pub struct ParticleBuilder {
     mass: Mass,
     position: Vector3d,
     velocity: Vector3d,
+    fixed: bool,
     attached_springs: HashSet<Rc<Spring>>,
 }
 
 impl ParticleBuilder {
-    /// Instantiate and return a new [`ParticleBuilder`] with a mass of 1.0 kg,
-    /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
-    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
-    pub fn new_1kg() -> ParticleBuilder {
-        ParticleBuilder::new(Mass::new::<kilogram>(1.0))
-    }
-
-    /// Instantiate and return a new [`ParticleBuilder`] with a given mass,
+    /// Instantiates and returns a new [`ParticleBuilder`] with a given mass,
     /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
     /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
     pub fn new(mass: Mass) -> ParticleBuilder {
@@ -159,17 +156,34 @@ impl ParticleBuilder {
             mass,
             position: Vector3d::zero(),
             velocity: Vector3d::zero(),
+            fixed: false,
             attached_springs: HashSet::new(),
         }
     }
 
-    /// Set the [`mass`] of the [`Particle`] in kilograms (kg).
+    /// Instantiates and returns a new fixed [`ParticleBuilder`] with a given mass
+    /// kg, position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
+    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
+    pub fn new_fixed(mass: Mass) -> ParticleBuilder {
+        ParticleBuilder::new(mass).set_fixed(true)
+    }
+
+    /// Sets whether the this [`Particle`] is fixed.
+    /// See [`Particle::fixed`] for details on its effects.
+    ///
+    /// Can be chained with other setter methods.
+    pub fn set_fixed(mut self, fixed: bool) -> ParticleBuilder {
+        self.fixed = fixed;
+        self
+    }
+
+    /// Sets the [`mass`] of the [`Particle`] in kilograms (kg).
     /// If the given new value for [`mass`] is non-positive,
     /// i.e., [`mass`] < 0.0 kg, the current [`mass`] remains unchanged.
     ///
     /// Can be chained with other setter methods.
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```rust
     /// # use uom::si::f64
@@ -197,11 +211,11 @@ impl ParticleBuilder {
         self
     }
 
-    /// Set the [`position`] of the [`Particle`] as a 3D vector in meters (m).
+    /// Sets the [`position`] of the [`Particle`] as a 3D vector in meters (m).
     ///
     /// Can be chained with other setter methods.
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```rust
     /// # use uom::si::f64
@@ -227,12 +241,12 @@ impl ParticleBuilder {
         self
     }
 
-    /// Set the [`velocity`] of the [`Particle`] as a 3D vector in meters per
+    /// Sets the [`velocity`] of the [`Particle`] as a 3D vector in meters per
     /// second (m/s).
     ///
     /// Can be chained with other setter methods.
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```rust
     /// # use uom::si::f64
@@ -262,7 +276,7 @@ impl ParticleBuilder {
         self
     }
 
-    /// Link this [`Particle`] to another [`Particle`]
+    /// Links this [`Particle`] to another [`Particle`]
     /// with a [`Spring`] of constant `spring_constant` in [newtons per meter]
     /// (N/m), updating [`attached_springs`] accordingly.
     ///
@@ -273,7 +287,7 @@ impl ParticleBuilder {
     ///
     /// [newtons per meter]: uom::si::surface_tension::newton_per_meter
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```rust
     /// # use uom::si::f64
