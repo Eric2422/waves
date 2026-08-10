@@ -1,9 +1,10 @@
-//! Module to represent [`Particle`]s in a longitudinal wave.
+//! Module to represent [`Particle`]s in a wave.
 
 use std::{
     collections::HashSet,
     fmt::{Debug, Display},
     hash::Hash,
+    rc::Rc,
     sync::atomic::{AtomicUsize, Ordering},
 };
 
@@ -41,7 +42,7 @@ pub struct Particle {
     /// Whether this particle should be considered fixed, e.g., a wall.
     fixed: bool,
     /// The springs attached to this [`Particle`].
-    attached_springs: HashSet<Spring>,
+    attached_springs: HashSet<Rc<Spring>>,
 }
 
 impl Clone for Particle {
@@ -139,7 +140,7 @@ pub struct ParticleBuilder {
     mass: Mass,
     position: Vector3d,
     velocity: Vector3d,
-    attached_springs: HashSet<Spring>,
+    attached_springs: HashSet<Rc<Spring>>,
 }
 
 impl ParticleBuilder {
@@ -294,7 +295,7 @@ impl ParticleBuilder {
     ///
     /// [`attached_springs`]: Particle::attached_springs
     pub fn attach_spring(mut self, spring: Spring) -> ParticleBuilder {
-        self.attached_springs.insert(spring);
+        self.attached_springs.insert(Rc::new(spring));
         self
     }
 
