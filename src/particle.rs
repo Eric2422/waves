@@ -31,14 +31,14 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 pub struct Particle {
     /// A unique unsigned integer identifying this [`Particle`].
     pub id: usize,
-    /// The mass of this [`Particle`] in kilograms (kg).
+    /// The mass of this [`Particle`]  in kilograms (kg).
     pub mass: Mass,
-    /// The position of this [`Particle`] as a 3D vector in meters (m).
+    /// The position of this [`Particle`] as a 3D vector in metres (m).
     pub position: Vector3d,
-    /// The velocity of this [`Particle`] as a 3D vector in meters per second (m/s).
+    /// The velocity of this [`Particle`] as a 3D vector in metres per second (m/s).
     pub velocity: Vector3d,
-    /// The acceleration of this particle as a 3D vector
-    /// in meters per second squared (m/s²).
+    /// The acceleration of this [`Particle`] as a 3D vector
+    /// in metres per second squared (m/s²).
     pub acceleration: Vector3d,
     /// Whether this [`Particle`] should be considered fixed, e.g., a wall.
     /// When fixed, the position should never change,
@@ -211,7 +211,11 @@ impl ParticleBuilder {
         self
     }
 
+<<<<<<< HEAD
     /// Sets the [`position`] of the [`Particle`] as a 3D vector in meters (m).
+=======
+    /// Set the [`position`] of the [`Particle`] as a 3D vector in metres (m).
+>>>>>>> main
     ///
     /// Can be chained with other setter methods.
     ///
@@ -241,7 +245,11 @@ impl ParticleBuilder {
         self
     }
 
+<<<<<<< HEAD
     /// Sets the [`velocity`] of the [`Particle`] as a 3D vector in meters per
+=======
+    /// Set the [`velocity`] of the [`Particle`] as a 3D vector in metres per
+>>>>>>> main
     /// second (m/s).
     ///
     /// Can be chained with other setter methods.
@@ -276,8 +284,13 @@ impl ParticleBuilder {
         self
     }
 
+<<<<<<< HEAD
     /// Links this [`Particle`] to another [`Particle`]
     /// with a [`Spring`] of constant `spring_constant` in [newtons per meter]
+=======
+    /// Link this [`Particle`] to another [`Particle`]
+    /// with a [`Spring`] of constant `spring_constant` in [newtons per metre]
+>>>>>>> main
     /// (N/m), updating [`attached_springs`] accordingly.
     ///
     /// If the given [`Particle`] already exists in [`attached_springs`],
@@ -285,7 +298,7 @@ impl ParticleBuilder {
     ///
     /// Can be chained with other setter methods.
     ///
-    /// [newtons per meter]: uom::si::surface_tension::newton_per_meter
+    /// [newtons per metre]: uom::si::surface_tension::newton_per_meter
     ///
     /// # Examples
     ///
