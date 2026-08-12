@@ -50,7 +50,7 @@ pub struct Particle {
 
 impl Clone for Particle {
     /// Create a deep copy of this [`Particle`] except for the [`id`] property,
-    /// which still increments by 1, similarly to [`Particle::new()`].
+    /// which still increments by 1, similarly to [`ParticleBuilder::new()`].
     ///
     /// [`id`]: Particle::id
     fn clone(&self) -> Self {
