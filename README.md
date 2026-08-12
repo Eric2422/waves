@@ -17,7 +17,7 @@ The time step size is in seconds ($\mathrm{s}$).
 
 The dimensions are the number of particles along each axis.
 
-The particle distances are in meters ($\mathrm{m}$).
+The particle distances are in metres ($\mathrm{m}$).
 A diagonal spring will have a greater length than the listed distances
 as given by Pythagorean's Theorem.
 A spring along the x-axis will have the length of the first element,
@@ -25,9 +25,9 @@ and so forth for springs along the y- and z-axes.
 
 The mass is in kilograms ($\mathrm{kg}$).
 
-The spring constant is in newtons per meter ($\mathrm{N/m}$).
+The spring constant is in newtons per metre ($\mathrm{N/m}$).
 
-The damping is in newton-seconds per meter ($\mathrm{N \cdot m \cdot s^{-1}}$)
+The damping is in newton-seconds per metre ($\mathrm{N \cdot m \cdot s^{-1}}$)
 or dimensionally equivalent to kilograms per second ($\mathrm{kg/s}$).
 
 The driving amplitude is in newtons ($\mathrm{N}$).
@@ -36,7 +36,7 @@ The driving angular frequency is in radians per second ($\mathrm{rad/s}$).
 
 The driving phase is in radians ($\mathrm{rad}$).
 
-The initial velocity is in meters per second ($\mathrm{m/s}$).
+The initial velocity is in metres per second ($\mathrm{m/s}$).
 *It is only applied to the driven particles.*
 
 ```json

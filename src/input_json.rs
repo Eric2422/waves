@@ -44,7 +44,7 @@ pub struct InputJson {
     /// [`Particle`]: crate::particle::Particle
     pub dimensions: [usize; 3],
     /// The distance between [`Particle`]s in each direction.
-    /// Measured in meters (m).
+    /// Measured in metres (m).
     ///
     /// [`Particle`]: crate::particle::Particle
     pub particle_distances: [Length; 3],
@@ -54,12 +54,12 @@ pub struct InputJson {
     /// [`Particle`]: crate::particle::Particle
     pub mass: Mass,
     /// The spring constant between each pair of [`Particle`]s,
-    /// measured in newtons per meter (N/m).
+    /// measured in newtons per metre (N/m).
     ///
     /// [`Particle`]: crate::particle::Particle
     pub spring_constant: dimension::SpringConstant,
     /// The damping coefficient of the [`Spring`]s
-    /// in newton-seconds per meter (N⋅s⋅m⁻¹)
+    /// in newton-seconds per metre (N⋅s⋅m⁻¹)
     /// or dimensionally equivalently in kilograms per second (kg/s).
     ///
     /// [`Spring`]: crate::particle::Spring
@@ -72,7 +72,7 @@ pub struct InputJson {
     /// [phase]: DrivingParameters::phase
     pub driving: DrivingParameters,
     /// The initial velocity of the *driven* [particles] only as a [3D vector]
-    /// measured in meters per second (m/s).
+    /// measured in metres per second (m/s).
     ///
     /// [particles]: crate::particle::Particle
     /// [3D vector]: crate::vector3d::Vector3d
