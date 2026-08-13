@@ -312,6 +312,8 @@ impl ParticleBuilder {
     /// [`PARTICLE_COUNTER`],
     /// which increments by one (1) every time this function is called.
     /// Thus, no two [`Particle`]s will have an identical [`id`].
+    /// If a [`Particle`] is directly instantiated without this function,
+    /// the automatic identifiers may break.
     ///
     /// [`mass`]: Particle::mass
     /// [`position`]: Particle::position
@@ -352,13 +354,19 @@ impl ParticleBuilder {
 }
 
 
+/// Counter for the [`id`] property of the [`Spring`] class.
+/// Increases by one (1) everytime
+///
+/// [`id`]: Particle::id
+static SPRING_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
 /// A spring of a given stiffness connecting two [`Particle`]s.
 #[derive(Clone, Debug)]
 pub struct Spring {
     /// A unique identifier for this [`Spring`].
     id: usize,
     /// The stiffness of this [`Spring`] in newtons per metre (N/m).
-    spring_constant: dimension::SpringConstant,
+    spring_stiffness: dimension::SpringStiffness,
     /// The resting length of this [`Spring`] in metres (m).
     resting_length: Length,
 }
@@ -371,9 +379,46 @@ impl Hash for Spring {
 
 impl PartialEq for Spring {
     fn eq(&self, other: &Self) -> bool {
-        self.spring_constant == other.spring_constant
+        self.spring_stiffness == other.spring_stiffness
             && self.resting_length.get::<meter>() == other.resting_length.get::<meter>()
     }
 }
 
 impl Eq for Spring {}
+
+impl Spring {
+    /// Creates a new [`Spring`]
+    /// using the given spring stiffness and resting length
+    /// and assigns it the next [`id`].
+    ///
+    /// As a side effect, increases [`SPRING_COUNTER`] by one (1).
+    ///
+    /// If a [`Spring`] is directly instantiated without this function,
+    /// the automatic identifiers may break.
+    ///
+    /// [`id`]: Particle::id
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use uom::si::f64
+    ///
+    /// let spring = Spring::new(1.0, 1.0);
+    ///
+    /// assert_eq!(
+    ///     spring,
+    ///     Spring {
+    ///         id: 0,
+    ///         spring_stiffness: 1.0,
+    ///         resting_length: 1.0
+    ///     }
+    /// );
+    /// ```
+    pub fn new(spring_stiffness: dimension::SpringStiffness, resting_length: Length) -> Spring {
+        Self {
+            id: SPRING_COUNTER.fetch_add(1, Ordering::SeqCst),
+            spring_stiffness,
+            resting_length,
+        }
+    }
+}

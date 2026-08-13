@@ -57,7 +57,7 @@ pub struct InputJson {
     /// measured in newtons per metre (N/m).
     ///
     /// [`Particle`]: crate::particle::Particle
-    pub spring_constant: dimension::SpringConstant,
+    pub spring_constant: dimension::SpringStiffness,
     /// The damping coefficient of the [`Spring`]s
     /// in newton-seconds per metre (N⋅s⋅m⁻¹)
     /// or dimensionally equivalently in kilograms per second (kg/s).

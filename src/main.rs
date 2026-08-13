@@ -28,7 +28,7 @@ use uom::{
 };
 
 use crate::{
-    dimension::SpringConstant,
+    dimension::SpringStiffness,
     input_json::InputJson,
     particle::{Particle, ParticleBuilder},
     vector3d::Vector3d,
@@ -111,13 +111,13 @@ Setting to the smallest positive value {} kg.",
         input_json.mass = Mass::new::<kilogram>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
-    if input_json.spring_constant == SpringConstant::ZERO {
+    if input_json.spring_constant == SpringStiffness::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is 0.0 N/m, but it should be non-zero.
 Setting to the smallest positive value {} N/m.",
             f64::MIN_POSITIVE
         );
-        input_json.spring_constant = SpringConstant::new::<newton_per_meter>(f64::MIN_POSITIVE);
+        input_json.spring_constant = SpringStiffness::new::<newton_per_meter>(f64::MIN_POSITIVE);
         passed_all_checks = false;
     }
 
@@ -165,7 +165,7 @@ Assuming a positive value of {} kg.",
 
         passed_all_checks = false;
     }
-    if input_json.spring_constant < SpringConstant::ZERO {
+    if input_json.spring_constant < SpringStiffness::ZERO {
         println!(
             "Warning: The spring constant given in {input_file_path:?} is {} N/m, but it should be positive.
 Assuming a positive value of {} N/m.",
@@ -195,7 +195,7 @@ fn calculate_spring_force(
     particles: &mut Vec<Vec<Vec<Particle>>>,
     particle_indices: [usize; 3],
     spring_lengths: [Length; 3],
-    spring_constant: SpringConstant,
+    spring_constant: SpringStiffness,
 ) -> Vector3d {
     let center_x = particle_indices[0];
     let center_y = particle_indices[1];
