@@ -367,9 +367,9 @@ impl ParticleBuilder {
 pub struct Spring {
     /// The [`Particle`]s that are connected by this [`Spring`].
     particles: [Particle; 2],
-    /// The stiffness of the spring in newtons per metre (N/m).
+    /// The stiffness of this [`Spring`] in newtons per metre (N/m).
     spring_constant: dimension::SpringConstant,
-    // The resting length of the spring in metres (m).
+    /// The resting length of this [`Spring`] in metres (m).
     resting_length: meter,
 }
 
