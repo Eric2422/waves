@@ -171,14 +171,13 @@ impl ParticleBuilder {
         ParticleBuilder::new(Mass::new::<kilogram>(f64::INFINITY))
     }
 
-    /// Sets the [`mass`] of the [`Particle`] in [kilograms] (kg).
+    /// Sets the [`mass`] of the [`Particle`] in kilograms (kg).
     /// If the given new value for [`mass`] is non-positive,
     /// i.e., [`mass`] < 0.0 kg, the current value remains unchanged.
     ///
     /// Can be chained with other setter methods.
     ///
     /// [`mass`]: Particle::mass
-    /// [kilograms]: uom::si::mass::kilogram
     ///
     /// # Examples
     ///
