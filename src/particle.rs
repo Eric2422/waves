@@ -355,23 +355,24 @@ impl ParticleBuilder {
 /// A spring of a given stiffness connecting two [`Particle`]s.
 #[derive(Clone, Debug)]
 pub struct Spring {
-    /// The [`Particle`]s that are connected by this [`Spring`].
-    particles: [Particle; 2],
+    /// A unique identifier for this [`Spring`].
+    id: usize,
     /// The stiffness of this [`Spring`] in newtons per metre (N/m).
     spring_constant: dimension::SpringConstant,
     /// The resting length of this [`Spring`] in metres (m).
-    resting_length: meter,
+    resting_length: Length,
 }
 
 impl Hash for Spring {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.particles.hash(state);
+        self.id.hash(state);
     }
 }
 
 impl PartialEq for Spring {
     fn eq(&self, other: &Self) -> bool {
-        self.particles == other.particles
+        self.spring_constant == other.spring_constant
+            && self.resting_length.get::<meter>() == other.resting_length.get::<meter>()
     }
 }
 
