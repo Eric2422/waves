@@ -41,10 +41,6 @@ pub struct Particle {
     /// The acceleration of this [`Particle`] as a 3D vector
     /// in metres per second squared (m/s²).
     pub acceleration: Vector3d,
-    /// Whether this [`Particle`] should be considered fixed, e.g., a wall.
-    /// When fixed, the position should never change,
-    /// and the velocity and acceleration should always be 0.
-    fixed: bool,
     /// The springs attached to this [`Particle`].
     attached_springs: HashSet<Rc<Spring>>,
 }
@@ -61,7 +57,6 @@ impl Clone for Particle {
             position: self.position.clone(),
             velocity: self.velocity.clone(),
             acceleration: self.acceleration.clone(),
-            fixed: self.fixed.clone(),
             attached_springs: self.attached_springs.clone(),
         }
     }
@@ -75,7 +70,6 @@ impl Debug for Particle {
             .field("position", &self.position)
             .field("velocity", &self.velocity)
             .field("acceleration", &self.acceleration)
-            .field("fixed", &self.fixed)
             .field("attached_springs", &self.attached_springs)
             .finish()
     }
@@ -85,12 +79,7 @@ impl Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{} {}: m = {}; r = {} m; v = {} m/s; a = {} m/s²",
-            if self.fixed {
-                "Fixed particle"
-            } else {
-                "Particle"
-            },
+            "Particle {}: m = {}; r = {} m; v = {} m/s; a = {} m/s²",
             self.id,
             self.mass.into_format_args(kilogram, Abbreviation),
             self.position,
@@ -144,7 +133,6 @@ pub struct ParticleBuilder {
     mass: Mass,
     position: Vector3d,
     velocity: Vector3d,
-    fixed: bool,
     attached_springs: HashSet<Rc<Spring>>,
 }
 
@@ -157,26 +145,17 @@ impl ParticleBuilder {
             mass,
             position: Vector3d::zero(),
             velocity: Vector3d::zero(),
-            fixed: false,
             attached_springs: HashSet::new(),
         }
     }
 
-    /// Instantiates and returns a new fixed [`ParticleBuilder`]
-    /// with a given mass, position of (0.0, 0.0, 0.0) m,
-    /// velocity of <0.0, 0.0, 0.0> m/s, acceleration of <0.0, 0.0, 0.0> m/s²,
-    /// and no attached [`Spring`]s.
-    pub fn new_fixed(mass: Mass) -> ParticleBuilder {
-        ParticleBuilder::new(mass).set_fixed(true)
-    }
-
-    /// Sets whether the this [`Particle`] is fixed.
-    /// See [`Particle::fixed`] for details on its effects.
-    ///
-    /// Can be chained with other setter methods.
-    pub fn set_fixed(mut self, fixed: bool) -> ParticleBuilder {
-        self.fixed = fixed;
-        self
+    /// Instantiates and returns a [`ParticleBuilder`] with an infinite mass,
+    /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
+    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
+    /// 
+    /// An infinite mass means that the particle is effectively fixed in place.
+    pub fn new_fixed() -> ParticleBuilder {
+        ParticleBuilder::new(Mass::new::<kilogram>(f64::INFINITY))
     }
 
     /// Sets the [`mass`] of the [`Particle`] in kilograms (kg).
@@ -354,7 +333,6 @@ impl ParticleBuilder {
             position: self.position,
             velocity: self.velocity,
             acceleration: Vector3d::zero(),
-            fixed: false,
             attached_springs: self.attached_springs,
         }
     }
