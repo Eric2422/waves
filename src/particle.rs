@@ -130,16 +130,24 @@ impl Particle {
 /// [`id`]: Particle::id
 #[derive(Default)]
 pub struct ParticleBuilder {
+    /// Field used to set [`Particle::mass`].
     mass: Mass,
+    /// Field used to set [`Particle::position`].
     position: Vector3d,
+    /// Field used to set [`Particle::velocity`].
     velocity: Vector3d,
+    /// Field used to set [`Particle::attached_springs`].
     attached_springs: HashSet<Rc<Spring>>,
 }
 
 impl ParticleBuilder {
-    /// Instantiates and returns a new [`ParticleBuilder`] with a given mass,
-    /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
-    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
+    /// Instantiates and returns a new [`ParticleBuilder`] with a given
+    /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m, [`velocity`] of <0.0,
+    /// 0.0, 0.0> m/s, and no attached [`Spring`]s.
+    ///
+    /// [`mass`]: Particle::mass
+    /// [`position`]: ParticleBuilder::position
+    /// [`velocity`]: ParticleBuilder::velocity
     pub fn new(mass: Mass) -> ParticleBuilder {
         ParticleBuilder {
             mass,
@@ -149,22 +157,28 @@ impl ParticleBuilder {
         }
     }
 
-    /// Instantiates and returns a [`ParticleBuilder`] with an infinite mass,
-    /// position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
-    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
-    /// 
-    /// An infinite mass means that the particle is effectively fixed in place.
+    /// Instantiates and returns a [`ParticleBuilder`] with an infinite
+    /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m, [`velocity`] of <0.0,
+    /// 0.0, 0.0> m/s, and no attached [`Spring`]s.
+    ///
+    /// An infinite [`mass`] means that the [`Particle`] is effectively fixed in
+    /// place.
+    ///
+    /// [`mass`]: Particle::mass
+    /// [`position`]: ParticleBuilder::position
+    /// [`velocity`]: ParticleBuilder::velocity
     pub fn new_fixed() -> ParticleBuilder {
         ParticleBuilder::new(Mass::new::<kilogram>(f64::INFINITY))
     }
 
-    /// Sets the [`mass`] of the [`Particle`] in kilograms (kg).
+    /// Sets the [`mass`] of the [`Particle`] in [kilograms] (kg).
     /// If the given new value for [`mass`] is non-positive,
-    /// i.e., [`mass`] < 0.0 kg, the current [`mass`] remains unchanged.
+    /// i.e., [`mass`] < 0.0 kg, the current value remains unchanged.
     ///
     /// Can be chained with other setter methods.
     ///
     /// [`mass`]: Particle::mass
+    /// [kilograms]: uom::si::mass::kilogram
     ///
     /// # Examples
     ///

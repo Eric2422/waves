@@ -9,5 +9,5 @@ pub type SpringConstant = SurfaceTension;
 /// Alias for [`MassRate`]
 /// because the damping coefficient and rate of mass change
 /// are dimensionally equivalent,
-/// e.g., newton-seconds per metre (N⋅s⋅m⁻¹)or kilograms per second (kg/s).
+/// e.g., newton-seconds per metre (N⋅s⋅m⁻¹) or kilograms per second (kg/s).
 pub type ViscousDamping = MassRate;
