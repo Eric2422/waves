@@ -211,11 +211,7 @@ impl ParticleBuilder {
         self
     }
 
-<<<<<<< HEAD
-    /// Sets the [`position`] of the [`Particle`] as a 3D vector in meters (m).
-=======
-    /// Set the [`position`] of the [`Particle`] as a 3D vector in metres (m).
->>>>>>> main
+    /// Sets the [`position`] of the [`Particle`] as a 3D vector in metres (m).
     ///
     /// Can be chained with other setter methods.
     ///
@@ -245,11 +241,7 @@ impl ParticleBuilder {
         self
     }
 
-<<<<<<< HEAD
-    /// Sets the [`velocity`] of the [`Particle`] as a 3D vector in meters per
-=======
-    /// Set the [`velocity`] of the [`Particle`] as a 3D vector in metres per
->>>>>>> main
+    /// Sets the [`velocity`] of the [`Particle`] as a 3D vector in metres per
     /// second (m/s).
     ///
     /// Can be chained with other setter methods.
@@ -284,13 +276,8 @@ impl ParticleBuilder {
         self
     }
 
-<<<<<<< HEAD
     /// Links this [`Particle`] to another [`Particle`]
-    /// with a [`Spring`] of constant `spring_constant` in [newtons per meter]
-=======
-    /// Link this [`Particle`] to another [`Particle`]
     /// with a [`Spring`] of constant `spring_constant` in [newtons per metre]
->>>>>>> main
     /// (N/m), updating [`attached_springs`] accordingly.
     ///
     /// If the given [`Particle`] already exists in [`attached_springs`],
