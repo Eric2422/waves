@@ -35,7 +35,8 @@ pub struct Particle {
     pub mass: Mass,
     /// The position of this [`Particle`] as a 3D vector in metres (m).
     pub position: Vector3d,
-    /// The velocity of this [`Particle`] as a 3D vector in metres per second (m/s).
+    /// The velocity of this [`Particle`] as a 3D vector in metres per second
+    /// (m/s).
     pub velocity: Vector3d,
     /// The acceleration of this [`Particle`] as a 3D vector
     /// in metres per second squared (m/s²).
@@ -161,9 +162,10 @@ impl ParticleBuilder {
         }
     }
 
-    /// Instantiates and returns a new fixed [`ParticleBuilder`] with a given mass
-    /// kg, position of (0.0, 0.0, 0.0) m, velocity of <0.0, 0.0, 0.0> m/s,
-    /// acceleration of <0.0, 0.0, 0.0> m/s², and no attached [`Spring`]s.
+    /// Instantiates and returns a new fixed [`ParticleBuilder`]
+    /// with a given mass, position of (0.0, 0.0, 0.0) m,
+    /// velocity of <0.0, 0.0, 0.0> m/s, acceleration of <0.0, 0.0, 0.0> m/s²,
+    /// and no attached [`Spring`]s.
     pub fn new_fixed(mass: Mass) -> ParticleBuilder {
         ParticleBuilder::new(mass).set_fixed(true)
     }
@@ -183,6 +185,8 @@ impl ParticleBuilder {
     ///
     /// Can be chained with other setter methods.
     ///
+    /// [`mass`]: Particle::mass
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -202,8 +206,6 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    ///
-    /// [`mass`]: Particle::mass
     pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder {
         if mass > Mass::ZERO {
             self.mass = mass;
@@ -215,6 +217,8 @@ impl ParticleBuilder {
     ///
     /// Can be chained with other setter methods.
     ///
+    /// [`position`]: Particle::position
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -234,8 +238,6 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    ///
-    /// [`position`]: Particle::position
     pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder {
         self.position = vector3d!(x.get::<meter>(), y.get::<meter>(), z.get::<meter>());
         self
@@ -246,6 +248,8 @@ impl ParticleBuilder {
     ///
     /// Can be chained with other setter methods.
     ///
+    /// [`velocity`]: Particle::velocity
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -265,8 +269,6 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    ///
-    /// [`velocity`]: Particle::velocity
     pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder {
         self.velocity = vector3d!(
             x.get::<meter_per_second>(),
@@ -276,16 +278,15 @@ impl ParticleBuilder {
         self
     }
 
-    /// Links this [`Particle`] to another [`Particle`]
-    /// with a [`Spring`] of constant `spring_constant` in [newtons per metre]
-    /// (N/m), updating [`attached_springs`] accordingly.
+    /// Links this [`Particle`] to another [`Particle`] with a [`Spring`],
+    /// updating [`attached_springs`] accordingly.
     ///
     /// If the given [`Particle`] already exists in [`attached_springs`],
     /// the pre-existing spring constant will be replaced with the new one.
     ///
     /// Can be chained with other setter methods.
     ///
-    /// [newtons per metre]: uom::si::surface_tension::newton_per_meter
+    /// [`attached_springs`]: Particle::attached_springs
     ///
     /// # Examples
     ///
@@ -306,8 +307,6 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    ///
-    /// [`attached_springs`]: Particle::attached_springs
     pub fn attach_spring(mut self, spring: Spring) -> ParticleBuilder {
         self.attached_springs.insert(Rc::new(spring));
         self
