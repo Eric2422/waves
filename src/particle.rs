@@ -28,7 +28,7 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 /// A single particle in a longitudinal wave,
 /// each connected to other particles by linear springs.
-pub struct Particle {
+pub struct Particle<'a> {
     /// A unique unsigned integer identifying this [`Particle`].
     pub id: usize,
     /// The mass of this [`Particle`]  in kilograms (kg).
@@ -42,10 +42,10 @@ pub struct Particle {
     /// in metres per second squared (m/s²).
     pub acceleration: Vector3d,
     /// The [`Spring`]s attached to this [`Particle`].
-    attached_springs: HashMap<Particle, Rc<Spring>>,
+    attached_springs: HashMap<&'a Particle<'a>, Rc<Spring>>,
 }
 
-impl Clone for Particle {
+impl<'a> Clone for Particle<'a> {
     /// Create a deep copy of this [`Particle`] except for the [`id`] property,
     /// which still increments by 1, similarly to [`ParticleBuilder::new()`].
     ///
@@ -62,7 +62,7 @@ impl Clone for Particle {
     }
 }
 
-impl Debug for Particle {
+impl<'a> Debug for Particle<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Particle")
             .field("id", &self.id)
@@ -75,7 +75,7 @@ impl Debug for Particle {
     }
 }
 
-impl Display for Particle {
+impl<'a> Display for Particle<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -89,16 +89,16 @@ impl Display for Particle {
     }
 }
 
-impl Eq for Particle {}
+impl<'a> Eq for Particle<'a> {}
 
-impl Hash for Particle {
+impl<'a> Hash for Particle<'a> {
     /// Generate a hash based on based on [`Particle::id`].
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
 }
 
-impl PartialEq for Particle {
+impl<'a> PartialEq for Particle<'a> {
     /// Check if this [`Particle`] is considered equivalent to another
     /// [`Particle`], returning `true` if and only if they have the same [`id`].
     ///
@@ -108,9 +108,9 @@ impl PartialEq for Particle {
     }
 }
 
-impl Particle {
+impl<'a> Particle<'a> {
     /// Instantiates and returns a new default [`ParticleBuilder`].
-    pub fn builder() -> ParticleBuilder {
+    pub fn builder() -> ParticleBuilder<'a> {
         ParticleBuilder::default()
     }
 }
@@ -129,7 +129,7 @@ impl Particle {
 /// [`attached_springs`]: Particle::attached_springs
 /// [`id`]: Particle::id
 #[derive(Default)]
-pub struct ParticleBuilder {
+pub struct ParticleBuilder<'a> {
     /// Field used to set [`Particle::mass`].
     mass: Mass,
     /// Field used to set [`Particle::position`].
@@ -137,10 +137,10 @@ pub struct ParticleBuilder {
     /// Field used to set [`Particle::velocity`].
     velocity: Vector3d,
     /// Field used to set [`Particle::attached_springs`].
-    attached_springs: HashMap<Particle, Rc<Spring>>,
+    attached_springs: HashMap<&'a Particle<'a>, Rc<Spring>>,
 }
 
-impl ParticleBuilder {
+impl<'a> ParticleBuilder<'a> {
     /// Instantiates and returns a new [`ParticleBuilder`] with a given
     /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m, [`velocity`] of <0.0,
     /// 0.0, 0.0> m/s, and no attached [`Spring`]s.
@@ -148,7 +148,7 @@ impl ParticleBuilder {
     /// [`mass`]: Particle::mass
     /// [`position`]: ParticleBuilder::position
     /// [`velocity`]: ParticleBuilder::velocity
-    pub fn new(mass: Mass) -> ParticleBuilder {
+    pub fn new(mass: Mass) -> ParticleBuilder<'a> {
         ParticleBuilder {
             mass,
             position: Vector3d::zero(),
@@ -167,7 +167,7 @@ impl ParticleBuilder {
     /// [`mass`]: Particle::mass
     /// [`position`]: ParticleBuilder::position
     /// [`velocity`]: ParticleBuilder::velocity
-    pub fn new_fixed() -> ParticleBuilder {
+    pub fn new_fixed() -> ParticleBuilder<'a> {
         ParticleBuilder::new(Mass::new::<kilogram>(f64::INFINITY))
     }
 
@@ -198,7 +198,7 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder {
+    pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder<'a> {
         if mass > Mass::ZERO {
             self.mass = mass;
         };
@@ -230,7 +230,7 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder {
+    pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder<'a> {
         self.position = vector3d!(x.get::<meter>(), y.get::<meter>(), z.get::<meter>());
         self
     }
@@ -261,7 +261,7 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder {
+    pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder<'a> {
         self.velocity = vector3d!(
             x.get::<meter_per_second>(),
             y.get::<meter_per_second>(),
@@ -299,7 +299,7 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn attach_spring(mut self, particle: Particle, spring: Spring) -> ParticleBuilder {
+    pub fn attach_spring(mut self, particle: &'a Particle, spring: Spring) -> ParticleBuilder<'a> {
         self.attached_springs.insert(particle, Rc::new(spring));
         self
     }
@@ -341,7 +341,7 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn build(self) -> Particle {
+    pub fn build(self) -> Particle<'a> {
         Particle {
             id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
             mass: self.mass,
