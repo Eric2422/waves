@@ -1,7 +1,7 @@
 //! Module to represent [`Particle`]s in a wave.
 
 use std::{
-    collections::HashSet,
+    collections::HashMap,
     fmt::{Debug, Display},
     hash::Hash,
     rc::Rc,
@@ -42,7 +42,7 @@ pub struct Particle {
     /// in metres per second squared (m/s²).
     pub acceleration: Vector3d,
     /// The [`Spring`]s attached to this [`Particle`].
-    attached_springs: HashSet<Rc<Spring>>,
+    attached_springs: HashMap<Particle, Rc<Spring>>,
 }
 
 impl Clone for Particle {
@@ -137,7 +137,7 @@ pub struct ParticleBuilder {
     /// Field used to set [`Particle::velocity`].
     velocity: Vector3d,
     /// Field used to set [`Particle::attached_springs`].
-    attached_springs: HashSet<Rc<Spring>>,
+    attached_springs: HashMap<Particle, Rc<Spring>>,
 }
 
 impl ParticleBuilder {
@@ -153,7 +153,7 @@ impl ParticleBuilder {
             mass,
             position: Vector3d::zero(),
             velocity: Vector3d::zero(),
-            attached_springs: HashSet::new(),
+            attached_springs: HashMap::new(),
         }
     }
 
@@ -299,8 +299,8 @@ impl ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn attach_spring(mut self, spring: Spring) -> ParticleBuilder {
-        self.attached_springs.insert(Rc::new(spring));
+    pub fn attach_spring(mut self, particle: Particle, spring: Spring) -> ParticleBuilder {
+        self.attached_springs.insert(particle, Rc::new(spring));
         self
     }
 
