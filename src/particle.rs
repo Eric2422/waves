@@ -41,7 +41,7 @@ pub struct Particle {
     /// The acceleration of this [`Particle`] as a 3D vector
     /// in metres per second squared (m/s²).
     pub acceleration: Vector3d,
-    /// The springs attached to this [`Particle`].
+    /// The [`Spring`]s attached to this [`Particle`].
     attached_springs: HashSet<Rc<Spring>>,
 }
 
