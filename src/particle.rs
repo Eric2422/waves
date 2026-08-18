@@ -19,7 +19,11 @@ use uom::{
     },
 };
 
-use crate::{dimension, vector3d, vector3d::Vector3d};
+use crate::{
+    dimension::{self, SpringStiffness},
+    vectors::Vector3d,
+    vector3d,
+};
 
 /// Counter for the [`id`] property of the [`Particle`] class.
 ///
@@ -270,8 +274,8 @@ impl<'a> ParticleBuilder<'a> {
         self
     }
 
-    /// Links this [`Particle`] to another [`Particle`] with a [`Spring`],
-    /// updating [`attached_springs`] accordingly.
+    /// Links this [`Particle`] to another [`Particle`] with a new [`Spring`]
+    /// of a given spring stiffness, updating [`attached_springs`] accordingly.
     ///
     /// If the given [`Particle`] already exists in [`attached_springs`],
     /// the pre-existing spring constant will be replaced with the new one.
@@ -299,8 +303,18 @@ impl<'a> ParticleBuilder<'a> {
     ///     )
     ///     .build();
     /// ```
-    pub fn attach_spring(mut self, particle: &'a Particle, spring: Spring) -> ParticleBuilder<'a> {
-        self.attached_springs.insert(particle, Rc::new(spring));
+    pub fn attach_spring(
+        mut self,
+        particle: &'a Particle,
+        spring_stiffness: SpringStiffness,
+    ) -> ParticleBuilder<'a> {
+        self.attached_springs.insert(
+            particle,
+            Rc::new(Spring::new(
+                spring_stiffness,
+                Length::new::<meter>((particle.position - self.position).get_magnitude()),
+            )),
+        );
         self
     }
 

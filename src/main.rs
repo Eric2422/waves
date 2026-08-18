@@ -1,7 +1,7 @@
 mod dimension;
 mod input_json;
 mod particle;
-mod vector3d;
+mod vectors;
 
 use std::{
     cmp, env,
@@ -31,7 +31,7 @@ use crate::{
     dimension::SpringStiffness,
     input_json::InputJson,
     particle::{Particle, ParticleBuilder},
-    vector3d::Vector3d,
+    vectors::Vector3d,
 };
 
 
