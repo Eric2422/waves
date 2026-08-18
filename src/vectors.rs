@@ -45,6 +45,8 @@ macro_rules! vector3d {
     };
 }
 
+
+
 impl Add for Vector3d {
     type Output = Vector3d;
 
