@@ -130,9 +130,9 @@ impl<'a> Particle<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use uom::si::f64
+    /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new()
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(1.0)).build();
     /// ```
     pub fn attach_spring(mut self, particle: &'a Particle, spring_stiffness: SpringStiffness) {
         let new_spring = Rc::new(Spring::new(
@@ -207,19 +207,18 @@ impl<'a> ParticleBuilder {
     /// # Examples
     ///
     /// ```rust
-    /// # use uom::si::f64
+    /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new()
-    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
     ///     .set_position(
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
     ///     )
     ///     .set_velocity(
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
     ///     )
     ///     .build();
     /// ```
@@ -239,19 +238,18 @@ impl<'a> ParticleBuilder {
     /// # Examples
     ///
     /// ```rust
-    /// # use uom::si::f64
+    /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new()
-    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
     ///     .set_position(
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
     ///     )
     ///     .set_velocity(
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
     ///     )
     ///     .build();
     /// ```
@@ -270,19 +268,18 @@ impl<'a> ParticleBuilder {
     /// # Examples
     ///
     /// ```rust
-    /// # use uom::si::f64
+    /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new()
-    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
     ///     .set_position(
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
     ///     )
     ///     .set_velocity(
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
     ///     )
     ///     .build();
     /// ```
@@ -316,19 +313,18 @@ impl<'a> ParticleBuilder {
     /// # Examples
     ///
     /// ```rust
-    /// # use uom::si::f64
+    /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new()
-    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
     ///     .set_position(
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(1.0),
     ///     )
     ///     .set_velocity(
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
+    ///         Velocity::new::<meter_per_second>(0.5),
     ///     )
     ///     .build();
     /// ```
@@ -391,9 +387,9 @@ impl Spring {
     /// # Examples
     ///
     /// ```rust
-    /// # use uom::si::f64
+    /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let spring = Spring::new(1.0, 1.0);
+    /// let spring = Spring::new(dimension::, 1.0);
     ///
     /// assert_eq!(
     ///     spring,
