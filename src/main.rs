@@ -34,7 +34,6 @@ use crate::{
     vector3d::Vector3d,
 };
 
-
 /// The [`str`] representation of the output directory.
 /// A [`Path`] would be easier to work with,
 /// but [`Path`]s can not be instantiated statically.

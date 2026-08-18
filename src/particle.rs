@@ -353,7 +353,6 @@ impl ParticleBuilder {
     }
 }
 
-
 /// Counter for the [`id`] property of the [`Spring`] class.
 /// Increases by one (1) everytime
 ///

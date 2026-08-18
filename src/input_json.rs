@@ -18,7 +18,6 @@ use uom::{
 
 use crate::dimension;
 
-
 /// Stores the driving parameters as part of [`InputJson`].
 #[derive(Serialize, Deserialize)]
 pub struct DrivingParameters {
