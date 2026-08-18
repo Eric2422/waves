@@ -21,8 +21,8 @@ use uom::{
 
 use crate::{
     dimension::{self, SpringStiffness},
-    vectors::Vector3d,
     vector3d,
+    vectors::Vector3d,
 };
 
 /// Counter for the [`id`] property of the [`Particle`] class.
@@ -308,13 +308,11 @@ impl<'a> ParticleBuilder<'a> {
         particle: &'a Particle,
         spring_stiffness: SpringStiffness,
     ) -> ParticleBuilder<'a> {
-        self.attached_springs.insert(
-            particle,
-            Rc::new(Spring::new(
-                spring_stiffness,
-                Length::new::<meter>((particle.position - self.position).get_magnitude()),
-            )),
-        );
+        let new_spring = Rc::new(Spring::new(
+            spring_stiffness,
+            Length::new::<meter>((particle.position - self.position).get_magnitude()),
+        ));
+        self.attached_springs.insert(particle, new_spring);
         self
     }
 
