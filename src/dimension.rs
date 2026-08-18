@@ -2,7 +2,6 @@
 
 use uom::si::f64::{MassRate, SurfaceTension};
 
-
 /// Alias for [`SurfaceTension`] to more accurately describe spring stiffness
 /// rather than surface tension, which are dimensionally equivalent.
 pub type SpringStiffness = SurfaceTension;

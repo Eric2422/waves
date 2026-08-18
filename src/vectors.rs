@@ -6,7 +6,6 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
-
 /// A 3D vector with x, y, and z values.
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct Vector3d {
@@ -44,8 +43,6 @@ macro_rules! vector3d {
         }
     };
 }
-
-
 
 impl Add for Vector3d {
     type Output = Vector3d;
