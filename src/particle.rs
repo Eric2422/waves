@@ -113,9 +113,33 @@ impl<'a> PartialEq for Particle<'a> {
 }
 
 impl<'a> Particle<'a> {
-    /// Instantiates and returns a new default [`ParticleBuilder`].
-    pub fn builder() -> ParticleBuilder<'a> {
+    /// Instantiates and returns a new default [`ParticleBuilder`]
+    /// (see [`ParticleBuilder::new()`]).
+    pub fn builder() -> ParticleBuilder {
         ParticleBuilder::default()
+    }
+
+    /// Links this [`Particle`] to another [`Particle`] with a new [`Spring`]
+    /// of a given spring stiffness, updating [`attached_springs`] accordingly.
+    ///
+    /// If the given [`Particle`] already exists in [`attached_springs`],
+    /// the pre-existing spring constant will be replaced with the new one.
+    ///
+    /// [`attached_springs`]: Particle::attached_springs
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use uom::si::f64
+    ///
+    /// let particle = ParticleBuilder::new()
+    /// ```
+    pub fn attach_spring(mut self, particle: &'a Particle, spring_stiffness: SpringStiffness) {
+        let new_spring = Rc::new(Spring::new(
+            spring_stiffness,
+            Length::new::<meter>((particle.position - self.position).get_magnitude()),
+        ));
+        self.attached_springs.insert(particle, new_spring);
     }
 }
 
@@ -133,18 +157,16 @@ impl<'a> Particle<'a> {
 /// [`attached_springs`]: Particle::attached_springs
 /// [`id`]: Particle::id
 #[derive(Default)]
-pub struct ParticleBuilder<'a> {
+pub struct ParticleBuilder {
     /// Field used to set [`Particle::mass`].
     mass: Mass,
     /// Field used to set [`Particle::position`].
     position: Vector3d,
     /// Field used to set [`Particle::velocity`].
     velocity: Vector3d,
-    /// Field used to set [`Particle::attached_springs`].
-    attached_springs: HashMap<&'a Particle<'a>, Rc<Spring>>,
 }
 
-impl<'a> ParticleBuilder<'a> {
+impl<'a> ParticleBuilder {
     /// Instantiates and returns a new [`ParticleBuilder`] with a given
     /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m, [`velocity`] of <0.0,
     /// 0.0, 0.0> m/s, and no attached [`Spring`]s.
@@ -152,12 +174,11 @@ impl<'a> ParticleBuilder<'a> {
     /// [`mass`]: Particle::mass
     /// [`position`]: ParticleBuilder::position
     /// [`velocity`]: ParticleBuilder::velocity
-    pub fn new(mass: Mass) -> ParticleBuilder<'a> {
+    pub fn new(mass: Mass) -> ParticleBuilder {
         ParticleBuilder {
             mass,
             position: Vector3d::zero(),
             velocity: Vector3d::zero(),
-            attached_springs: HashMap::new(),
         }
     }
 
@@ -171,7 +192,7 @@ impl<'a> ParticleBuilder<'a> {
     /// [`mass`]: Particle::mass
     /// [`position`]: ParticleBuilder::position
     /// [`velocity`]: ParticleBuilder::velocity
-    pub fn new_fixed() -> ParticleBuilder<'a> {
+    pub fn new_fixed() -> ParticleBuilder {
         ParticleBuilder::new(Mass::new::<kilogram>(f64::INFINITY))
     }
 
@@ -202,7 +223,7 @@ impl<'a> ParticleBuilder<'a> {
     ///     )
     ///     .build();
     /// ```
-    pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder<'a> {
+    pub fn set_mass(mut self, mass: Mass) -> ParticleBuilder {
         if mass > Mass::ZERO {
             self.mass = mass;
         };
@@ -234,7 +255,7 @@ impl<'a> ParticleBuilder<'a> {
     ///     )
     ///     .build();
     /// ```
-    pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder<'a> {
+    pub fn set_position(mut self, x: Length, y: Length, z: Length) -> ParticleBuilder {
         self.position = vector3d!(x.get::<meter>(), y.get::<meter>(), z.get::<meter>());
         self
     }
@@ -265,54 +286,12 @@ impl<'a> ParticleBuilder<'a> {
     ///     )
     ///     .build();
     /// ```
-    pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder<'a> {
+    pub fn set_velocity(mut self, x: Velocity, y: Velocity, z: Velocity) -> ParticleBuilder {
         self.velocity = vector3d!(
             x.get::<meter_per_second>(),
             y.get::<meter_per_second>(),
             z.get::<meter_per_second>()
         );
-        self
-    }
-
-    /// Links this [`Particle`] to another [`Particle`] with a new [`Spring`]
-    /// of a given spring stiffness, updating [`attached_springs`] accordingly.
-    ///
-    /// If the given [`Particle`] already exists in [`attached_springs`],
-    /// the pre-existing spring constant will be replaced with the new one.
-    ///
-    /// Can be chained with other setter methods.
-    ///
-    /// [`attached_springs`]: Particle::attached_springs
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use uom::si::f64
-    ///
-    /// let particle = ParticleBuilder::new()
-    ///     .set_mass(uom::si::f64::Mass::new::<kilogram>(2.0))
-    ///     .set_position(
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///         uom::si::f64::Length::new::<meter>(1.0),
-    ///     )
-    ///     .set_velocity(
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///         uom::si::f64::Velocity::new::<meter_per_second>(0.5),
-    ///     )
-    ///     .build();
-    /// ```
-    pub fn attach_spring(
-        mut self,
-        particle: &'a Particle,
-        spring_stiffness: SpringStiffness,
-    ) -> ParticleBuilder<'a> {
-        let new_spring = Rc::new(Spring::new(
-            spring_stiffness,
-            Length::new::<meter>((particle.position - self.position).get_magnitude()),
-        ));
-        self.attached_springs.insert(particle, new_spring);
         self
     }
 
@@ -360,11 +339,10 @@ impl<'a> ParticleBuilder<'a> {
             position: self.position,
             velocity: self.velocity,
             acceleration: Vector3d::zero(),
-            attached_springs: self.attached_springs,
+            attached_springs: HashMap::new(),
         }
     }
 }
-
 
 /// Counter for the [`id`] property of the [`Spring`] class.
 /// Increases by one (1) everytime
