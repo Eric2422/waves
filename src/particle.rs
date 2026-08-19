@@ -315,7 +315,7 @@ impl<'a> ParticleBuilder {
     /// ```rust
     /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0))
     ///     .set_position(
     ///         Length::new::<meter>(1.0),
     ///         Length::new::<meter>(1.0),
@@ -389,14 +389,19 @@ impl Spring {
     /// ```rust
     /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let spring = Spring::new(dimension::, 1.0);
+    /// # use crate::dimension::SpringStiffness
+    ///
+    /// let spring = Spring::new(
+    ///     SpringStiffness::new::<kilogram_per_second>(1.0),
+    ///     Length::new::<meter>(1.0),
+    /// );
     ///
     /// assert_eq!(
     ///     spring,
     ///     Spring {
     ///         id: 0,
-    ///         spring_stiffness: 1.0,
-    ///         resting_length: 1.0
+    ///         SpringStiffness::new::<kilogram_per_second>(1.0),
+    ///         Length::new::<meter>(1.0)
     ///     }
     /// );
     /// ```
