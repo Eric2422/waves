@@ -209,7 +209,7 @@ impl<'a> ParticleBuilder {
     /// ```rust
     /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0))
     ///     .set_position(
     ///         Length::new::<meter>(1.0),
     ///         Length::new::<meter>(1.0),
@@ -240,7 +240,7 @@ impl<'a> ParticleBuilder {
     /// ```rust
     /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0))
     ///     .set_position(
     ///         Length::new::<meter>(1.0),
     ///         Length::new::<meter>(1.0),
@@ -270,7 +270,7 @@ impl<'a> ParticleBuilder {
     /// ```rust
     /// # use uom::si::f64::{Length, Mass, Velocity}
     ///
-    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0)
+    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(2.0))
     ///     .set_position(
     ///         Length::new::<meter>(1.0),
     ///         Length::new::<meter>(1.0),
