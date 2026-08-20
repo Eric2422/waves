@@ -32,7 +32,7 @@ static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 /// A single particle in a longitudinal wave,
 /// each connected to other particles by linear springs.
-pub struct Particle<'a> {
+pub struct Particle {
     /// A unique unsigned integer identifying this [`Particle`].
     pub id: usize,
     /// The mass of this [`Particle`]  in kilograms (kg).
@@ -45,11 +45,9 @@ pub struct Particle<'a> {
     /// The acceleration of this [`Particle`] as a 3D vector
     /// in metres per second squared (m/s²).
     pub acceleration: Vector3d,
-    /// The [`Spring`]s attached to this [`Particle`].
-    attached_springs: HashMap<&'a Particle<'a>, Rc<Spring>>,
 }
 
-impl<'a> Clone for Particle<'a> {
+impl<'a> Clone for Particle {
     /// Create a deep copy of this [`Particle`] except for the [`id`] property,
     /// which still increments by 1, similarly to [`ParticleBuilder::new()`].
     ///
@@ -61,12 +59,11 @@ impl<'a> Clone for Particle<'a> {
             position: self.position.clone(),
             velocity: self.velocity.clone(),
             acceleration: self.acceleration.clone(),
-            attached_springs: self.attached_springs.clone(),
         }
     }
 }
 
-impl<'a> Debug for Particle<'a> {
+impl<'a> Debug for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Particle")
             .field("id", &self.id)
@@ -74,12 +71,11 @@ impl<'a> Debug for Particle<'a> {
             .field("position", &self.position)
             .field("velocity", &self.velocity)
             .field("acceleration", &self.acceleration)
-            .field("attached_springs", &self.attached_springs)
             .finish()
     }
 }
 
-impl<'a> Display for Particle<'a> {
+impl<'a> Display for Particle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -93,16 +89,16 @@ impl<'a> Display for Particle<'a> {
     }
 }
 
-impl<'a> Eq for Particle<'a> {}
+impl<'a> Eq for Particle {}
 
-impl<'a> Hash for Particle<'a> {
+impl<'a> Hash for Particle {
     /// Generate a hash based on based on [`Particle::id`].
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
 }
 
-impl<'a> PartialEq for Particle<'a> {
+impl<'a> PartialEq for Particle {
     /// Check if this [`Particle`] is considered equivalent to another
     /// [`Particle`], returning `true` if and only if they have the same [`id`].
     ///
@@ -112,34 +108,11 @@ impl<'a> PartialEq for Particle<'a> {
     }
 }
 
-impl<'a> Particle<'a> {
+impl<'a> Particle {
     /// Instantiates and returns a new default [`ParticleBuilder`]
     /// (see [`ParticleBuilder::new()`]).
     pub fn builder() -> ParticleBuilder {
         ParticleBuilder::default()
-    }
-
-    /// Links this [`Particle`] to another [`Particle`] with a new [`Spring`]
-    /// of a given spring stiffness, updating [`attached_springs`] accordingly.
-    ///
-    /// If the given [`Particle`] already exists in [`attached_springs`],
-    /// the pre-existing spring constant will be replaced with the new one.
-    ///
-    /// [`attached_springs`]: Particle::attached_springs
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use uom::si::f64::{Length, Mass, Velocity}
-    ///
-    /// let particle = ParticleBuilder::new(Mass::new::<kilogram>(1.0)).build();
-    /// ```
-    pub fn attach_spring(mut self, particle: &'a Particle, spring_stiffness: SpringStiffness) {
-        let new_spring = Rc::new(Spring::new(
-            spring_stiffness,
-            Length::new::<meter>((particle.position - self.position).get_magnitude()),
-        ));
-        self.attached_springs.insert(particle, new_spring);
     }
 }
 
@@ -328,14 +301,13 @@ impl<'a> ParticleBuilder {
     ///     )
     ///     .build();
     /// ```
-    pub fn build(self) -> Particle<'a> {
+    pub fn build(self) -> Particle {
         Particle {
             id: PARTICLE_COUNTER.fetch_add(1, Ordering::SeqCst),
             mass: self.mass,
             position: self.position,
             velocity: self.velocity,
             acceleration: Vector3d::zero(),
-            attached_springs: HashMap::new(),
         }
     }
 }
