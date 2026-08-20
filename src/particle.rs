@@ -168,8 +168,8 @@ pub struct ParticleBuilder {
 
 impl<'a> ParticleBuilder {
     /// Instantiates and returns a new [`ParticleBuilder`] with a given
-    /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m, [`velocity`] of <0.0,
-    /// 0.0, 0.0> m/s, and no attached [`Spring`]s.
+    /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m,
+    /// [`velocity`] of (0.0, 0.0, 0.0) m/s, and no attached [`Spring`]s.
     ///
     /// [`mass`]: Particle::mass
     /// [`position`]: ParticleBuilder::position
@@ -183,8 +183,8 @@ impl<'a> ParticleBuilder {
     }
 
     /// Instantiates and returns a [`ParticleBuilder`] with an infinite
-    /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m, [`velocity`] of <0.0,
-    /// 0.0, 0.0> m/s, and no attached [`Spring`]s.
+    /// [`mass`], [`position`] of (0.0, 0.0, 0.0) m,
+    /// [`velocity`] of (0.0, 0.0, 0.0) m/s, and no attached [`Spring`]s.
     ///
     /// An infinite [`mass`] means that the [`Particle`] is effectively fixed in
     /// place.
