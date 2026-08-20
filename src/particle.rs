@@ -1,10 +1,8 @@
 //! Module to represent [`Particle`]s in a wave.
 
 use std::{
-    collections::HashMap,
     fmt::{Debug, Display},
     hash::Hash,
-    rc::Rc,
     sync::atomic::{AtomicUsize, Ordering},
 };
 
@@ -19,11 +17,7 @@ use uom::{
     },
 };
 
-use crate::{
-    dimension::{self, SpringStiffness},
-    vector3d,
-    vectors::Vector3d,
-};
+use crate::{dimension::SpringStiffness, vector3d, vectors::Vector3d};
 
 /// Counter for the [`id`] property of the [`Particle`] class.
 ///
@@ -320,34 +314,36 @@ static SPRING_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 /// A spring of a given stiffness connecting two [`Particle`]s.
 #[derive(Clone, Debug)]
-pub struct Spring {
+pub struct Spring<'a> {
     /// A unique identifier for this [`Spring`].
     id: usize,
+    /// The two [`Particle`]s that this [`Spring`] connects.
+    particles: [&'a Particle; 2],
     /// The stiffness of this [`Spring`] in newtons per metre (N/m).
-    spring_stiffness: dimension::SpringStiffness,
+    spring_stiffness: SpringStiffness,
     /// The resting length of this [`Spring`] in metres (m).
     resting_length: Length,
 }
 
-impl Hash for Spring {
+impl<'a> Hash for Spring<'a> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
 }
 
-impl PartialEq for Spring {
+impl<'a> PartialEq for Spring<'a> {
     fn eq(&self, other: &Self) -> bool {
         self.spring_stiffness == other.spring_stiffness
             && self.resting_length.get::<meter>() == other.resting_length.get::<meter>()
     }
 }
 
-impl Eq for Spring {}
+impl<'a> Eq for Spring<'a> {}
 
-impl Spring {
-    /// Creates a new [`Spring`]
-    /// using the given spring stiffness and resting length
-    /// and assigns it the next [`id`].
+impl<'a> Spring<'a> {
+    /// Creates a new [`Spring`] two connect [`Particle`]s
+    /// using the given spring stiffness and resting length.
+    /// The new [`Spring`] is assigned to the next [`id`].
     ///
     /// As a side effect, increases [`SPRING_COUNTER`] by one (1).
     ///
@@ -363,7 +359,19 @@ impl Spring {
     ///
     /// # use crate::dimension::SpringStiffness
     ///
+    /// let particles = [
+    ///     ParticleBuilder::new(Mass::new::<kilogram>(1.0)).build(),
+    ///     ParticleBuilder::new(Mass::new::<kilogram>(1.0)).build()
+    ///     .set_position(
+    ///         Length::new::<meter>(1.0),
+    ///         Length::new::<meter>(0.0),
+    ///         Length::new::<meter>(0.0),
+    ///     )
+    ///     .build()
+    /// ];
+    ///
     /// let spring = Spring::new(
+    ///     particles,
     ///     SpringStiffness::new::<kilogram_per_second>(1.0),
     ///     Length::new::<meter>(1.0),
     /// );
@@ -372,14 +380,20 @@ impl Spring {
     ///     spring,
     ///     Spring {
     ///         id: 0,
+    ///         particles,
     ///         SpringStiffness::new::<kilogram_per_second>(1.0),
     ///         Length::new::<meter>(1.0)
     ///     }
     /// );
     /// ```
-    pub fn new(spring_stiffness: dimension::SpringStiffness, resting_length: Length) -> Spring {
+    pub fn new(
+        particles: [&'a Particle; 2],
+        spring_stiffness: SpringStiffness,
+        resting_length: Length,
+    ) -> Spring<'a> {
         Self {
             id: SPRING_COUNTER.fetch_add(1, Ordering::SeqCst),
+            particles,
             spring_stiffness,
             resting_length,
         }
