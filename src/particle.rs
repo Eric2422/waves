@@ -405,6 +405,10 @@ impl<'a> Spring<'a> {
     }
 
     /// Create a new adjacency matrix for a given number of [`Particle`]s.
+    /// The adjacency matrix will be a square matrix
+    /// of size `num_particles` × `num_particles`.
+    /// Each element is a [`Spring`] with dummy values,
+    /// namely [`None`], -1.0 N/m, and -1.0 m.
     pub fn new_adjacency_matrix(num_particles: usize) -> Vec<Vec<Spring<'a>>> {
         (0..num_particles)
             .map(|_i| {
