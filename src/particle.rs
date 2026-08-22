@@ -1,5 +1,6 @@
 //! Module to represent [`Particle`]s in a wave.
 
+use core::num;
 use std::{
     fmt::{Debug, Display},
     hash::Hash,
@@ -13,6 +14,8 @@ use uom::{
         f64::{Length, Mass, Velocity},
         length::meter,
         mass::kilogram,
+        mass_rate::kilogram_per_second,
+        surface_tension::newton_per_meter,
         velocity::meter_per_second,
     },
 };
@@ -24,10 +27,12 @@ use crate::{dimension::SpringStiffness, vector3d, vectors::Vector3d};
 /// [`id`]: Particle::id
 static PARTICLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
-/// A single particle in a longitudinal wave,
-/// each connected to other particles by linear springs.
+/// A single particle in a wave,
+/// each connected to other [`Particle`]s by linear [`Spring`]s.
 pub struct Particle {
     /// A unique unsigned integer identifying this [`Particle`].
+    /// May fail if objects are instantiated manually
+    /// instead of using [`ParticleBuilder`].
     pub id: usize,
     /// The mass of this [`Particle`]  in kilograms (kg).
     pub mass: Mass,
@@ -318,7 +323,7 @@ pub struct Spring<'a> {
     /// A unique identifier for this [`Spring`].
     id: usize,
     /// The two [`Particle`]s that this [`Spring`] connects.
-    particles: [&'a Particle; 2],
+    particles: Option<[&'a Particle; 2]>,
     /// The stiffness of this [`Spring`] in newtons per metre (N/m).
     spring_stiffness: SpringStiffness,
     /// The resting length of this [`Spring`] in metres (m).
@@ -372,7 +377,7 @@ impl<'a> Spring<'a> {
     ///
     /// let spring = Spring::new(
     ///     particles,
-    ///     SpringStiffness::new::<kilogram_per_second>(1.0),
+    ///     SpringStiffness::new::<newton_per_meter>(1.0),
     ///     Length::new::<meter>(1.0),
     /// );
     ///
@@ -381,13 +386,13 @@ impl<'a> Spring<'a> {
     ///     Spring {
     ///         id: 0,
     ///         particles,
-    ///         SpringStiffness::new::<kilogram_per_second>(1.0),
+    ///         SpringStiffness::new::<newton_per_meter>(1.0),
     ///         Length::new::<meter>(1.0)
     ///     }
     /// );
     /// ```
     pub fn new(
-        particles: [&'a Particle; 2],
+        particles: Option<[&'a Particle; 2]>,
         spring_stiffness: SpringStiffness,
         resting_length: Length,
     ) -> Spring<'a> {
@@ -397,5 +402,22 @@ impl<'a> Spring<'a> {
             spring_stiffness,
             resting_length,
         }
+    }
+
+    /// Create a new adjacency matrix for a given number of [`Particle`]s.
+    pub fn new_adjacency_matrix(num_particles: usize) -> Vec<Vec<Spring<'a>>> {
+        (0..num_particles)
+            .map(|_i| {
+                (0..num_particles)
+                    .map(|_j| {
+                        Spring::new(
+                            None,
+                            SpringStiffness::new::<newton_per_meter>(-1.0),
+                            Length::new::<meter>(-1.0),
+                        )
+                    })
+                    .collect()
+            })
+            .collect()
     }
 }
