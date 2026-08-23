@@ -418,6 +418,43 @@ Input JSON: {input_file_path:?}
         println!("Warning: Failed to write to the output file {output_file_path:?}.")
     });
 
+    let mut iterator: Vec<Vec<Particle>> = (0..input_json.dimensions[0])
+        .map(|x| {
+            (0..input_json.dimensions[1])
+                .map(|y| {
+                    (0..input_json.dimensions[2])
+                        .map(|z| {
+                            // Only apply initial velocity to the first x-layer,
+                            // i.e., the driven particles.
+                            if x == 0 {
+                                ParticleBuilder::new(input_json.mass)
+                                    .set_position(
+                                        (x as f64) * input_json.particle_distances[0],
+                                        (y as f64) * input_json.particle_distances[1],
+                                        (z as f64) * input_json.particle_distances[2],
+                                    )
+                                    .set_velocity(
+                                        input_json.initial_velocity[0],
+                                        input_json.initial_velocity[1],
+                                        input_json.initial_velocity[2],
+                                    )
+                                    .build()
+                            } else {
+                                ParticleBuilder::new(input_json.mass)
+                                    .set_position(
+                                        (x as f64) * input_json.particle_distances[0],
+                                        (y as f64) * input_json.particle_distances[1],
+                                        (z as f64) * input_json.particle_distances[2],
+                                    )
+                                    .build()
+                            }
+                        })
+                        .collect()
+                })
+                .collect()
+        })
+        .collect();
+
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = Vec::new();
     for x in 0..input_json.dimensions[0] {
