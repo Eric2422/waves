@@ -17,7 +17,7 @@ use uom::{
     fmt::DisplayStyle::Abbreviation,
     si::{
         angle::radian,
-        f64::{Length, Mass, MassRate, Time},
+        f64::{Length, Mass, MassRate, Time, Velocity},
         force::newton,
         length::meter,
         mass::kilogram,
@@ -427,28 +427,30 @@ Input JSON: {input_file_path:?}
                         .map(|z| {
                             // Only apply initial velocity to the first x-layer,
                             // i.e., the driven particles.
-                            if x == 0 {
-                                ParticleBuilder::new(input_json.mass)
-                                    .set_position(
-                                        (x as f64) * input_json.particle_distances[0],
-                                        (y as f64) * input_json.particle_distances[1],
-                                        (z as f64) * input_json.particle_distances[2],
-                                    )
-                                    .set_velocity(
-                                        input_json.initial_velocity[0],
-                                        input_json.initial_velocity[1],
-                                        input_json.initial_velocity[2],
-                                    )
-                                    .build()
-                            } else {
-                                ParticleBuilder::new(input_json.mass)
-                                    .set_position(
-                                        (x as f64) * input_json.particle_distances[0],
-                                        (y as f64) * input_json.particle_distances[1],
-                                        (z as f64) * input_json.particle_distances[2],
-                                    )
-                                    .build()
-                            }
+                            ParticleBuilder::new(input_json.mass)
+                                .set_position(
+                                    (x as f64) * input_json.particle_distances[0],
+                                    (y as f64) * input_json.particle_distances[1],
+                                    (z as f64) * input_json.particle_distances[2],
+                                )
+                                .set_velocity(
+                                    if x == 0 {
+                                        Velocity::ZERO
+                                    } else {
+                                        input_json.initial_velocity[0]
+                                    },
+                                    if x == 0 {
+                                        Velocity::ZERO
+                                    } else {
+                                        input_json.initial_velocity[1]
+                                    },
+                                    if x == 0 {
+                                        Velocity::ZERO
+                                    } else {
+                                        input_json.initial_velocity[2]
+                                    },
+                                )
+                                .build()
                         })
                         .collect()
                 })
