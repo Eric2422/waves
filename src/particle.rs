@@ -411,9 +411,9 @@ impl<'a> Spring<'a> {
     /// namely [`None`], -1.0 N/m, and -1.0 m.
     pub fn new_adjacency_matrix(num_particles: usize) -> Vec<Vec<Spring<'a>>> {
         (0..num_particles)
-            .map(|_i| {
+            .map(|_| {
                 (0..num_particles)
-                    .map(|_j| {
+                    .map(|_| {
                         Spring::new(
                             None,
                             SpringStiffness::new::<newton_per_meter>(-1.0),
