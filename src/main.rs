@@ -233,7 +233,7 @@ fn calculate_spring_force(
             for z in start_z..end_z {
                 // Add the force if it is not the center particle.
                 if particles[x][y][z] != *center_particle {
-                    // Get the current, stretched vector between the particles.
+                    // Get the current stretched vector between the particles.
                     let distance_vector = center_particle.position - particles[x][y][z].position;
                     // Calculate the resting length.
                     let resting_length = vector3d!(
@@ -243,7 +243,7 @@ fn calculate_spring_force(
                     )
                     .get_magnitude();
 
-                    // Apply Hooke's Law.
+                    // Apply Hooke's law.
                     spring_force += -spring_constant.get::<newton_per_meter>()
                         * (distance_vector.get_magnitude() - resting_length)
                         * distance_vector.get_normalized();
