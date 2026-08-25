@@ -189,6 +189,27 @@ Assuming a positive value of {} N⋅s⋅m⁻¹.",
     passed_all_checks
 }
 
+/// Helper function to initialize [`Particle`]s with the correct initial
+/// velocity.
+fn initialize_particle(x: usize, y: usize, z: usize, input_json: &InputJson) -> Particle {
+    ParticleBuilder::new(input_json.mass)
+        .set_position(
+            (x as f64) * input_json.particle_distances[0],
+            (y as f64) * input_json.particle_distances[1],
+            (z as f64) * input_json.particle_distances[2],
+        )
+        .set_velocity_vector(if x == 0 {
+            Vector3d::zero()
+        } else {
+            vector3d!(
+                input_json.initial_velocity[0].get::<meter_per_second>(),
+                input_json.initial_velocity[1].get::<meter_per_second>(),
+                input_json.initial_velocity[2].get::<meter_per_second>()
+            )
+        })
+        .build()
+}
+
 /// Calculates the total spring force from the surrounding [`Particle`]s acting
 /// upon the [`Particle`] at `particle_indices in `particles`.
 fn calculate_spring_force(
@@ -428,22 +449,7 @@ Input JSON: {input_file_path:?}
                         .map(|z| {
                             // Only apply initial velocity to the first x-layer,
                             // i.e., the driven particles.
-                            ParticleBuilder::new(input_json.mass)
-                                .set_position(
-                                    (x as f64) * input_json.particle_distances[0],
-                                    (y as f64) * input_json.particle_distances[1],
-                                    (z as f64) * input_json.particle_distances[2],
-                                )
-                                .set_velocity_vector(if x == 0 {
-                                    Vector3d::zero()
-                                } else {
-                                    vector3d!(
-                                        input_json.initial_velocity[0].get::<meter_per_second>(),
-                                        input_json.initial_velocity[1].get::<meter_per_second>(),
-                                        input_json.initial_velocity[2].get::<meter_per_second>()
-                                    )
-                                })
-                                .build()
+                            initialize_particle(x, y, z, &input_json)
                         })
                         .collect()
                 })
