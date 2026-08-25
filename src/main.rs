@@ -17,7 +17,7 @@ use uom::{
     fmt::DisplayStyle::Abbreviation,
     si::{
         angle::radian,
-        f64::{Length, Mass, MassRate, Time, Velocity},
+        f64::{Length, Mass, MassRate, Time},
         force::newton,
         length::meter,
         mass::kilogram,
