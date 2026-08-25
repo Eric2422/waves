@@ -17,7 +17,7 @@ use uom::{
     fmt::DisplayStyle::Abbreviation,
     si::{
         angle::radian,
-        f64::{Length, Mass, MassRate, Time},
+        f64::{Length, Mass, MassRate, Time, Velocity},
         force::newton,
         length::meter,
         mass::kilogram,
@@ -191,20 +191,25 @@ Assuming a positive value of {} N⋅s⋅m⁻¹.",
 
 /// Helper function to initialize [`Particle`]s with the correct initial
 /// velocity.
-fn initialize_particle(x: usize, y: usize, z: usize, input_json: &InputJson) -> Particle {
-    ParticleBuilder::new(input_json.mass)
+fn initialize_particle(
+    indices: [usize; 3],
+    mass: Mass,
+    particle_distances: [Length; 3],
+    initial_velocity: [Velocity; 3],
+) -> Particle {
+    ParticleBuilder::new(mass)
         .set_position(
-            (x as f64) * input_json.particle_distances[0],
-            (y as f64) * input_json.particle_distances[1],
-            (z as f64) * input_json.particle_distances[2],
+            (indices[0] as f64) * particle_distances[0],
+            (indices[1] as f64) * particle_distances[1],
+            (indices[2] as f64) * particle_distances[2],
         )
-        .set_velocity_vector(if x == 0 {
+        .set_velocity_vector(if indices[0] == 0 {
             Vector3d::zero()
         } else {
             vector3d!(
-                input_json.initial_velocity[0].get::<meter_per_second>(),
-                input_json.initial_velocity[1].get::<meter_per_second>(),
-                input_json.initial_velocity[2].get::<meter_per_second>()
+                initial_velocity[0].get::<meter_per_second>(),
+                initial_velocity[1].get::<meter_per_second>(),
+                initial_velocity[2].get::<meter_per_second>()
             )
         })
         .build()
@@ -442,14 +447,19 @@ Input JSON: {input_file_path:?}
 
     // Create a grid of identical particles.
     let mut particles: Vec<Vec<Vec<Particle>>> = (0..input_json.dimensions[0])
-        .map(|x| {
+        .map(|i| {
             (0..input_json.dimensions[1])
-                .map(|y| {
+                .map(|j| {
                     (0..input_json.dimensions[2])
-                        .map(|z| {
+                        .map(|k| {
                             // Only apply initial velocity to the first x-layer,
                             // i.e., the driven particles.
-                            initialize_particle(x, y, z, &input_json)
+                            initialize_particle(
+                                [i, j, k],
+                                input_json.mass,
+                                input_json.particle_distances,
+                                input_json.initial_velocity,
+                            )
                         })
                         .collect()
                 })
