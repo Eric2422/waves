@@ -24,6 +24,7 @@ use uom::{
         mass_rate::kilogram_per_second,
         surface_tension::newton_per_meter,
         time::second,
+        velocity::meter_per_second,
     },
 };
 
@@ -433,23 +434,15 @@ Input JSON: {input_file_path:?}
                                     (y as f64) * input_json.particle_distances[1],
                                     (z as f64) * input_json.particle_distances[2],
                                 )
-                                .set_velocity(
-                                    if x == 0 {
-                                        Velocity::ZERO
-                                    } else {
-                                        input_json.initial_velocity[0]
-                                    },
-                                    if x == 0 {
-                                        Velocity::ZERO
-                                    } else {
-                                        input_json.initial_velocity[1]
-                                    },
-                                    if x == 0 {
-                                        Velocity::ZERO
-                                    } else {
-                                        input_json.initial_velocity[2]
-                                    },
-                                )
+                                .set_velocity_vector(if x == 0 {
+                                    Vector3d::zero()
+                                } else {
+                                    vector3d!(
+                                        input_json.initial_velocity[0].get::<meter_per_second>(),
+                                        input_json.initial_velocity[1].get::<meter_per_second>(),
+                                        input_json.initial_velocity[2].get::<meter_per_second>()
+                                    )
+                                })
                                 .build()
                         })
                         .collect()

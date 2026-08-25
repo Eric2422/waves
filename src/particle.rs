@@ -264,6 +264,16 @@ impl<'a> ParticleBuilder {
         self
     }
 
+    /// Acts the same as [`set_velocity()`] but as a [`Vector3d`] in meters per
+    /// second (m/s).
+    /// See [`set_velocity()`] for more details.
+    ///
+    /// [`set_velocity()`]: ParticleBuilder::set_velocity
+    pub fn set_velocity_vector(mut self, velocity: Vector3d) -> ParticleBuilder {
+        self.velocity = velocity;
+        self
+    }
+
     /// Attempts to instantiate a new [`Particle`] object
     /// using the current values of [`mass`], [`position`], [`velocity`],
     /// [`acceleration`], and [`attached_springs`].
