@@ -264,6 +264,16 @@ impl<'a> ParticleBuilder {
         self
     }
 
+    /// Acts the same as [`set_velocity()`] but as a [`Vector3d`] in meters per
+    /// second (m/s).
+    /// See [`set_velocity()`] for more details.
+    ///
+    /// [`set_velocity()`]: ParticleBuilder::set_velocity
+    pub fn set_velocity_vector(mut self, velocity: Vector3d) -> ParticleBuilder {
+        self.velocity = velocity;
+        self
+    }
+
     /// Attempts to instantiate a new [`Particle`] object
     /// using the current values of [`mass`], [`position`], [`velocity`],
     /// [`acceleration`], and [`attached_springs`].
@@ -411,9 +421,9 @@ impl<'a> Spring<'a> {
     /// namely [`None`], -1.0 N/m, and -1.0 m.
     pub fn new_adjacency_matrix(num_particles: usize) -> Vec<Vec<Spring<'a>>> {
         (0..num_particles)
-            .map(|_i| {
+            .map(|_| {
                 (0..num_particles)
-                    .map(|_j| {
+                    .map(|_| {
                         Spring::new(
                             None,
                             SpringStiffness::new::<newton_per_meter>(-1.0),
