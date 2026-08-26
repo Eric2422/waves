@@ -321,7 +321,7 @@ pub struct Spring<'a> {
     /// A unique identifier for this [`Spring`].
     id: usize,
     /// The two [`Particle`]s that this [`Spring`] connects.
-    particles: Option<[&'a Particle; 2]>,
+    particles: [&'a Particle; 2],
     /// The stiffness of this [`Spring`] in newtons per metre (N/m).
     spring_stiffness: SpringStiffness,
     /// The resting length of this [`Spring`] in metres (m).
@@ -390,7 +390,7 @@ impl<'a> Spring<'a> {
     /// );
     /// ```
     pub fn new(
-        particles: Option<[&'a Particle; 2]>,
+        particles: [&'a Particle; 2],
         spring_stiffness: SpringStiffness,
         resting_length: Length,
     ) -> Spring<'a> {
@@ -405,21 +405,15 @@ impl<'a> Spring<'a> {
     /// Create a new adjacency matrix for a given number of [`Particle`]s.
     /// The adjacency matrix will be a square matrix
     /// of size `num_particles` × `num_particles`.
-    /// Each element is a [`Spring`] with dummy values,
-    /// namely [`None`], -1.0 N/m, and -1.0 m.
-    pub fn new_adjacency_matrix(num_particles: usize) -> Vec<Vec<Spring<'a>>> {
+    /// Each element is simply `None`.
+    /// 
+    /// Ideally, the size of the matrix should not be changed,
+    /// but that is unenforceable.
+    /// Arrays must have sizes fixed at compile-time,
+    /// and vectors allow for sizes at run-time but also changeable sizes.
+    pub fn new_adjacency_matrix(num_particles: usize) -> Vec<Vec<Option<Spring<'a>>>> {
         (0..num_particles)
-            .map(|_i| {
-                (0..num_particles)
-                    .map(|_j| {
-                        Spring::new(
-                            None,
-                            SpringStiffness::new::<newton_per_meter>(-1.0),
-                            Length::new::<meter>(-1.0),
-                        )
-                    })
-                    .collect()
-            })
+            .map(|_i| (0..num_particles).map(|_j| None).collect())
             .collect()
     }
 }
