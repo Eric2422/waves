@@ -1,6 +1,5 @@
 //! Module to represent [`Particle`]s in a wave.
 
-use core::num;
 use std::{
     fmt::{Debug, Display},
     hash::Hash,
@@ -14,7 +13,6 @@ use uom::{
         f64::{Length, Mass, Velocity},
         length::meter,
         mass::kilogram,
-        mass_rate::kilogram_per_second,
         surface_tension::newton_per_meter,
         velocity::meter_per_second,
     },
