@@ -418,8 +418,8 @@ Input JSON: {input_file_path:?}
         println!("Warning: Failed to write to the output file {output_file_path:?}.")
     });
 
-    // Create an adjacency matrix to store the connectins between particles.
-    let adjacency_matrix = particle::Spring::new_adjacency_matrix(
+    // Create an adjacency matrix to store the connections between particles.
+    let mut adjacency_matrix = particle::Spring::new_adjacency_matrix(
         input_json.dimensions[0] * input_json.dimensions[1] * input_json.dimensions[2],
     );
 
