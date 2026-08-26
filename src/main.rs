@@ -189,8 +189,11 @@ Assuming a positive value of {} N⋅s⋅m⁻¹.",
     passed_all_checks
 }
 
-/// Helper function to initialize [`Particle`]s with the correct initial
-/// velocity.
+/// Helper function to initialize [`Particle`]s with the correct mass, position,
+/// and initial velocity.
+///
+/// The `indices` represent the [`Particle`]s position in relation to other
+/// [`Particle`]s.
 fn initialize_particle(
     indices: [usize; 3],
     mass: Mass,
