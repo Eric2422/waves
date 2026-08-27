@@ -262,6 +262,16 @@ impl<'a> ParticleBuilder {
         self
     }
 
+    /// Acts the same as [`set_velocity()`] but as a [`Vector3d`] in meters per
+    /// second (m/s).
+    /// See [`set_velocity()`] for more details.
+    ///
+    /// [`set_velocity()`]: ParticleBuilder::set_velocity
+    pub fn set_velocity_vector(mut self, velocity: Vector3d) -> ParticleBuilder {
+        self.velocity = velocity;
+        self
+    }
+
     /// Attempts to instantiate a new [`Particle`] object
     /// using the current values of [`mass`], [`position`], [`velocity`],
     /// [`acceleration`], and [`attached_springs`].
@@ -406,7 +416,7 @@ impl<'a> Spring<'a> {
     /// The adjacency matrix will be a square matrix
     /// of size `num_particles` × `num_particles`.
     /// Each element is simply `None`.
-    /// 
+    ///
     /// Ideally, the size of the matrix should not be changed,
     /// but that is unenforceable.
     /// Arrays must have sizes fixed at compile-time,
