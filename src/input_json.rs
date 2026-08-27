@@ -57,12 +57,29 @@ pub struct InputJson {
     ///
     /// [`Particle`]: crate::particle::Particle
     pub spring_constant: dimension::SpringStiffness,
+    /// How the [`Spring`]s should connect [`Particle`]s.
+    /// The default value is "default" or "adjacent",
+    /// which connects all [`Particle`]s to their adjacent neighbors.
+    /// "orthogonal" [sic] only connects to the four neighbors orthogonal to a
+    /// [`Particle`].
+    /// "custom" uses the connections specified in [`InputJson::connections`].
+    ///
+    /// [`Particle`]: crate::particle::Particle
+    /// [`Spring`]: crate::particle::Spring
+    pub connection_type: String,
+    /// A listing of which [`Particle`]s are connected by [`Spring`]s,
+    /// Each element in the array should be a two-element array
+    /// listing a pair of [`Particle`]s to be connected by a [`Spring`].
+    ///
+    /// [`Particle`]: crate::particle::Particle
+    /// [`Spring`]: crate::particle::Spring
+    pub connections: [[usize; 2]; 0],
+    pub damping: dimension::ViscousDamping,
     /// The damping coefficient of the [`Spring`]s
     /// in newton-seconds per metre (N⋅s⋅m⁻¹)
     /// or dimensionally equivalently in kilograms per second (kg/s).
     ///
     /// [`Spring`]: crate::particle::Spring
-    pub damping: dimension::ViscousDamping,
     /// The [amplitude], [angular frequency], and [phase] of the driving as
     /// described in greater detail under [`DrivingParameters`].
     ///
@@ -88,6 +105,7 @@ Time step size: {}
 Particle distances: ({}, {}, {}) {}
 Dimensions: {:?}
 Spring constant: {}
+Connection type: {},
 Damping: {}
 Driving parameters:
     Amplitude: ({}, {}, {}) {}
@@ -102,6 +120,7 @@ Driving parameters:
             self.dimensions,
             self.spring_constant
                 .into_format_args(newton_per_meter, Abbreviation),
+            self.connection_type,
             self.damping
                 .into_format_args(kilogram_per_second, Abbreviation),
             self.driving.amplitude[0].get::<force::newton>(),
